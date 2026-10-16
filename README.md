@@ -1,88 +1,54 @@
 # Common Ground Architectuuragent
 
-## PSA genereren, huisstijl en publicatie
+## Projectarchitectuur: vernieuwd appscherm
 
-De primaire groene knop is **Genereer PSA**. De app gebruikt Rotterdam-groen **`#00811F`** voor primaire acties. In het losse `index.html` opent de knop een venster met **In welke huisstijl? → Rotterdam / Common Ground** en meervoudige keuzes **PDF-formaat**, **Confluence** en **Notion**. In de Python-app staan dezelfde keuzes boven de generatieknop.
+Open `index.html` door erop te dubbelklikken na het uitpakken van de ZIP. Het bestand bevat alle afbeeldingen, stijlen, de PDF-lezer en PDF-generator; er is geen installatie nodig. De werkruimte heet **Architectuuragent**, toont het gemeentelogo van Rotterdam en gebruikt Rotterdam-groen `#00811F`. Het originele logo en de bijbehorende rechtenverklaring staan in `assets/rotterdam/`.
 
-Standaard genereert het losse HTML-bestand lokaal een **eerste brongebaseerde concept-PSA**: projectafbakening, expliciete bronfragmenten met broncodes, geadviseerde ABB/SBB’s per laag, een concept-ADR en open besluiten. Dit is geen semantische AI-synthese en geen vastgesteld ontwerp. Er wordt niets verzonnen om ontbrekende broninformatie op te vullen. Geselecteerde maar ontbrekende of onleesbare bronnen blokkeren generatie; bronnen die nog worden gelezen moeten eerst gereed zijn. Een gewijzigde bronset maakt het oude concept zichtbaar verouderd en blokkeert verdere publicatie totdat opnieuw is gegenereerd.
+### Bronselectie
 
-In hetzelfde venster kun je **AI-synthese gebruiken (optioneel)** openen en de lokale service instellen. Zet hiervoor `OPENAI_API_KEY` veilig op de service; `OPENAI_MODEL` is optioneel. De expliciete AI-keuze en de bevestiging dat de bronnen gedeeld mogen worden zijn vereist. Pas na een klik op genereren gaan de geselecteerde bronteksten via de lokale `/generate`-route naar de bestaande OpenAI-workflow. De API-sleutel komt niet in het HTML-bestand of de generatieaanvraag terecht. Deze route handhaaft de bronlimiet van 155.000 tekens. Een ontbrekende AI-koppeling geeft een foutmelding, geen stilzwijgende terugval naar een zogenaamd AI-resultaat.
+- **Enterprise architectuur Platform Dienstverlening**: ophalen van de opgegeven openbare [GitHub-bron](https://github.com/ivorstenbosch-maker/EnterpriseArchitectuurCG/blob/main/Enterprisearchitectuur-GPT.md) of een eigen versie uploaden. **Alle hoofdstukken gaan volledig mee**, zonder hoofdstukkeuze of stilzwijgende inkorting. URL, ophaaldatum en SHA-256 blijven in de bronselectie vastgelegd.
+- **Bouwstenen Rotterdam**: selecteer ABB’s en SBB’s uit een aangeleverde export van de [Horizzon-view](https://rotterdam.horizzon.cloud/sites/8579a6d6-9680-4fee-959c-4793130eef6f/views/e059f7c1-e164-f111-bb43-025a1dd2f359). Zoeken filtert alleen de zichtbare lijst; aangevinkte bouwstenen blijven geselecteerd. Alleen geselecteerde bouwstenen, hun beschrijvingen, object-ID’s en exportkenmerk gaan mee naar generatie.
+- **Projectdocumenten en overige bronnen**: PDF, DOCX, TXT of Markdown lokaal uitlezen, met keuze per bestand. Niet-leesbare bronnen blokkeren generatie totdat ze zijn vervangen of uitgevinkt.
 
-Je kunt het concept bekijken, de opgemaakte HTML downloaden en bij de keuze PDF een **echt PDF-bestand** downloaden. jsPDF 4.2.1 en de MIT-licentie zijn ingebed; de oorspronkelijke pakketdownload is tegen de officiële SHA-512 gecontroleerd. De Python-app gebruikt de bestaande AI-workflow voor synthese en PyMuPDF voor PDF-uitvoer. Bij deze wijziging zijn geen betaalde API-aanroepen uitgevoerd.
+De afzonderlijke secties voor bouwblokkenadvies, bestaande ADR’s en privacy-/beveiligingskaders zijn verwijderd. De oudere adviesmodule en tests van de parsing blijven beschikbaar in de code, maar worden niet gebruikt in dit scherm en leveren geen vervangende Rotterdamse catalogus.
 
-De huisstijlkeuze bepaalt kleuren, koppen, typografie en documentstructuur. **Rotterdam** gebruikt `#00811F`, **Common Ground** gebruikt `#0D4F67`. De profielen staan in `assets/housestyles.json`. Er zijn geen officiële logo’s of gelicenseerde huisstijlfonts meegeleverd; dit zijn vormgevingsprofielen, geen bevestiging van formele huisstijlgoedkeuring. Notion ondersteunt geen willekeurige hexkleuren of fonts: daar worden het huisstijllabel, de koppenstructuur en de beschikbare groene/blauwe kopkleuren toegepast. Confluence krijgt de huisstijlvermelding en een paneel in de profielkleuren; de ruimtebrede vormgeving blijft door Confluence bepaald.
+### Rotterdamse bouwstenen uit Horizzon
 
-Een vinkje bij Confluence of Notion is een **publicatiekeuze**, geen publicatiebevestiging. Bekijk en beoordeel eerst de PSA. Alleen via **Publiceer beoordeelde PSA** worden de gekozen bestemmingen aangeroepen. Het scherm toont per bestemming of een pagina daadwerkelijk is bevestigd, of waarom nog niet is gepubliceerd. Beide koppelingen worden lokaal met mocks getest; echte publicatie is hier nog niet uitgevoerd omdat credentials en doelpagina’s ontbreken.
+De openbare URL levert de Horizzon-applicatie, met een authenticatiecontrole op de site-route. Zonder een geautoriseerde sessie zijn hier geen echte Rotterdamse bouwstenengegevens opgehaald. Het losse bestand heeft geen directe live API-koppeling of sessieovername. Gebruik een CSV- of JSON-export van de bouwstenen; de app verzint geen namen, classificaties of verplichtingen. Voor een live koppeling zijn een geautoriseerde API en serverconfiguratie nodig; geen tokens in het deelbare HTML-bestand.
 
-### Publiceren vanuit het losse index-bestand
+De import ondersteunt een CSV met komma of puntkomma, een JSON-lijst of een JSON-object met `objects` of `building_blocks`. Velden per rij:
 
-Het deelbare HTML-bestand bevat geen platformtokens. Voor AI-synthese en/of live publicatie kan een lokale Python-service worden gebruikt:
+| Veld | Herkende namen | Inhoud |
+| --- | --- | --- |
+| ID | id, object id, identifier | Uniek object-ID uit de export |
+| Naam | name, naam | Naam van de bouwsteen |
+| Bouwsteentype | building block type, bouwsteentype, classification, classificatie, type | ABB / Architecture Building Block of SBB / Solution Building Block |
+| Beschrijving (optioneel) | description, beschrijving, documentation, documentatie | Bronbeschrijving |
+| Laag (optioneel) | layer, laag | Expliciete bronlaag, bv. Laag 5 Interactie |
 
-1. Stel `PSA_SERVICE_TOKEN` veilig in als een eigen ASCII-sleutel van minimaal 24 tekens. Neem deze sleutel niet op in Git, een gedeeld HTML-bestand of chat.
-2. Stel voor Notion `NOTION_TOKEN` en `NOTION_PARENT_PAGE_ID` in; geef de integratie toegang tot die pagina.
-3. Stel voor Confluence Cloud `CONFLUENCE_BASE_URL` (bijvoorbeeld `https://organisatie.atlassian.net`), `CONFLUENCE_EMAIL`, `CONFLUENCE_TOKEN` en `CONFLUENCE_SPACE_ID` in. `CONFLUENCE_PARENT_ID` is optioneel. De service ondersteunt de Confluence Cloud-API, niet willekeurige on-premise-URL’s.
-4. Start vanuit de projectmap: `.venv/bin/python publication_service.py`. De service luistert uitsluitend op `127.0.0.1:8765` en logt geen tokens of documentinhoud.
-5. Vul bij het resultaat in de browser onder **Publicatiekoppeling instellen** de lokale URL `http://127.0.0.1:8765` en de service-sleutel in. Bevestig de review en klik op publiceren. De service heeft leesbare platformcredentials nodig; plaats geen sleutels in de HTML. De browser kan om toestemming voor lokaal netwerkverkeer vragen.
+Objecten zonder expliciete ABB/SBB-classificatie, ID of naam worden overgeslagen en geteld. Een ArchiMate-objecttype zoals ApplicationComponent geldt op zichzelf niet als een SBB-classificatie. Dubbele ID’s geven een foutmelding. Maximaal 5 MB en 10.000 objecten per export. Er wordt geen catalogus met fictieve Rotterdamse bouwstenen meegeleverd.
 
-De service controleert toegang, broncodes en reviewbevestiging. Binnen dezelfde servicerun worden reeds bevestigde publicaties van hetzelfde concept, dezelfde huisstijl en bestemming hergebruikt. Na een time-out of serverherstart moet je de doelpagina controleren voordat je opnieuw publiceert: er zijn geen automatische retries van schrijfverzoeken. Alleen de beoordeelde PSA en bronverwijzingen gaan naar de platforms, niet de originele bestanden. De Python-webapp kan dezelfde platforms rechtstreeks gebruiken via de instellingen in de zijbalk.
+### Generatie, huisstijl en publicatie
 
-## Direct openen zonder installatie
+**Genereer PA** opent de keuze **Rotterdam / Common Ground** en **PDF / Confluence / Notion** (meerdere mogelijk). Het losse bestand maakt standaard lokaal een eerste brongebaseerd concept: herkenbare bronfragmenten, geselecteerde bouwstenen, concept-ADR en open besluiten. Dit is geen semantische AI-synthese of vastgesteld ontwerp. PDF en HTML gebruiken de gekozen kleuren en typografie. Notion ondersteunt alleen platformkleuren, Confluence behoudt het thema van de doelruimte. De uitvoerprofielen zijn geen gecertificeerde officiële documenttemplates.
 
-Download `index.html` en open dit bestand met een dubbelklik in je browser. Het donkere app-scherm en de architectuurafbeelding zitten samen in dit ene bestand; hiervoor is geen Python, Streamlit of webserver nodig.
+Optioneel: open AI-synthese in het generatievenster. Stel `OPENAI_API_KEY` veilig in op de lokale service, `OPENAI_MODEL` is optioneel. Vink expliciet aan dat de geselecteerde bronnen gedeeld mogen worden. Alleen na een klik op genereren gaan volledige geselecteerde bronteksten naar de bestaande AI-workflow. De gedeelde index bevat geen sleutels. De bronlimiet is verhoogd tot **900.000 tekens** om de volledige enterprise architectuur (circa 388.000 tekens) en aanvullende bronnen te ondersteunen. Grotere sets geven een fout; niets wordt automatisch afgekapt. Gebruik een model met voldoende contextcapaciteit; de service garandeert geen capaciteit van een zelf ingesteld ander model.
 
-Je kunt projectgegevens invullen, bronnen selecteren, lokale documenten kiezen, de openbare enterprise architectuur ophalen en hoofdstukken selecteren, en de bronselectie inclusief bouwblokkenadvies als JSON downloaden. Daarnaast kun je een eerste concept-PSA genereren en in de gekozen huisstijl als PDF of HTML bewaren. Voor het ophalen van de openbare bron is internet nodig; een eigen versie uploaden werkt ook zonder internet. Geselecteerde PDF-, DOCX-, TXT- en Markdown-documenten worden lokaal gelezen voor advies en bronfragmenten. Het JSON-bestand bevat de bronkeuze, bestandsmetadata en korte bewijsfragmenten bij het advies, geen volledige kopieën van de lokale bestanden. Zonder gekoppelde service gebruikt het losse bestand geen semantische AI-synthese; de optionele AI-keuze gebruikt de bestaande workflow via de lokale service. Publicatie naar Notion of Confluence is alleen mogelijk na review via de ingestelde lokale publicatieservice; zonder koppeling meldt het scherm expliciet dat nog niet is gepubliceerd.
+Een vinkje bij Notion of Confluence publiceert nog niets. Review eerst het concept en gebruik de aparte publicatieknop. Gewijzigde bronnen maken een eerder concept verouderd en blokkeren publicatie totdat opnieuw is gegenereerd.
 
-De werkruimte heeft een donkere vormgeving met Rotterdam-groene primaire acties en een lokaal opgeslagen architectuurvisual. Het beeld in `assets/architecture-hero.png` is speciaal voor deze app gegenereerd: een illustratief model met vijf zwevende lagen, geen weergave van een vastgesteld ontwerp. De visual en stijlen worden zonder externe beeldservers geladen. De bronselectie, invoer en review blijven bedienbaar op desktop en telefoon. De groene knop in het beeld opent de PSA-generatiekeuzes.
+### Lokale AI- en publicatieservice
 
-## Projectstartarchitectuur: project en bronnen kiezen
+1. Stel `PSA_SERVICE_TOKEN` in op een eigen ASCII-sleutel van minimaal 24 tekens (bestaande configuratienaam behouden). Bewaar sleutels buiten Git en gedeelde bestanden.
+2. Optioneel AI: `OPENAI_API_KEY` en `OPENAI_MODEL`.
+3. Optioneel Notion: `NOTION_TOKEN` en `NOTION_PARENT_PAGE_ID`.
+4. Optioneel Confluence Cloud: `CONFLUENCE_BASE_URL`, `CONFLUENCE_EMAIL`, `CONFLUENCE_TOKEN`, `CONFLUENCE_SPACE_ID`; optioneel `CONFLUENCE_PARENT_ID`.
+5. Start `.venv/bin/python publication_service.py` en vul `http://127.0.0.1:8765` met de service-sleutel in het appscherm in.
 
-Het beginscherm laat een architect een **nieuwe projectstartarchitectuur (PSA)** samenstellen. Vul de projectnaam en het doel/de afbakening in en selecteer welke bronnen moeten worden meegenomen. Voor een nieuwe PSA is geen bestaand Word-document nodig. De bestaande workflow blijft beschikbaar via **Type architectuur → Bestaande architectuur bijwerken**.
+De service luistert alleen lokaal, controleert toegang en review, verstuurt geen bronbestanden naar publicatieplatforms en bewaart binnen de servicerun bevestigde publicaties om dubbele pagina’s te beperken. Na time-outs of herstarts: controleer de doelpagina voor opnieuw publiceren. Er zijn geen automatische retries van schrijfverzoeken. De Streamlit-app (`.venv/bin/streamlit run app.py`) ondersteunt dezelfde bronkeuze en publicatieplatforms.
 
-De vaste bronoptie **Enterprise architectuur Platform Dienstverlening** verwijst naar de door de gebruiker opgegeven [GitBook](https://dienstverleningsplatform.gitbook.io/platform-generieke-dienstverlening-public/enterprisearchitectuur) en leest de [Markdown-bron op GitHub](https://github.com/ivorstenbosch-maker/EnterpriseArchitectuurCG/blob/main/Enterprisearchitectuur-GPT.md). De volledige tekst is circa 388.000 tekens, groter dan de huidige bronlimiet van 155.000 tekens. Daarom kiest de architect expliciet welke hoofdstukken mee moeten. Standaard zijn dit **Managementsamenvatting** en **Visie, principes, scope**. Andere hoofdstukken worden niet automatisch meegenomen of samengevat.
+### Zelf bouwen en controleren
 
-Met **Bron vernieuwen** haalt de app de actuele openbare tekst op. Een lokale momentopname wordt bewaard in de genegeerde map `.source-cache/`. De app toont ophaaldatum en bronkenmerk; het geselecteerde brondocument bevat de URL, de SHA-256 van de volledige tekst en de gekozen hoofdstukken. De momentopname is geen vastgezette officiële versie. Voor een eigen of historische versie kun je ook een PDF, DOCX, TXT of Markdown uploaden. De opgehaalde volledige bron wordt niet in deze Git-repository gepubliceerd.
-
-Andere broncategorieën zijn **Horizon Rotterdam**, **bestaande ADR’s** en **privacy- en beveiligingskaders**. Dit zijn uploadmogelijkheden, geen vooraf ingevulde of gevalideerde documenten. Daarnaast kun je projectopdrachten, requirements en andere projectdocumenten toevoegen en per bestand aan- of uitvinken.
-
-## Geadviseerd gebruik van ABB’s en SBB’s
-
-Tussen de enterprise architectuur en Horizon Rotterdam staat **Toe te passen bouwblokken**. De catalogus bevat de 34 ABB’s en 30 unieke SBB-labels uit het onderdeel *Solution Building Blocks (SBB’s) en mapping op ABB’s* in de enterprise architectuur. Namen, onderlinge mapping, bronregels, ophaaldatum en de SHA-256 van de bronmomentopname zijn vastgelegd in `assets/building-blocks.json`. Samengestelde of alternatieve SBB-labels uit de bron (bijvoorbeeld `Keycloak / Autorisatieservice`) blijven als zodanig herkenbaar: dit is geen keuze voor alle alternatieven tegelijk.
-
-Het scherm geeft **lokaal trefwoordadvies** op basis van projectnaam, afbakening en de daadwerkelijk geselecteerde documentinhoud. De adviesregels zijn heuristieken; het is geen semantische AI-analyse en er worden geen verplichte kaders bij verzonnen. De algemene enterprise-architectuurtekst wordt niet als projectvraag gebruikt, omdat deze anders ieder bouwblok relevant zou laten lijken.
-
-Bij een match worden de ABB en de bijbehorende SBB’s automatisch aangevinkt. De architect ziet de aanleiding, het bewijsfragment en de letterlijke bronmapping. Onderwerpwijzigingen en aan- of uitvinken van documenten werken door in het advies. Handmatige afwijkingen blijven behouden; **Volg automatisch advies** wist die afwijkingen. Overige catalogusbouwblokken zijn handmatig toe te voegen. Het advies blijft **te beoordelen**, geen vastgesteld architectuurbesluit.
-
-De HTML-versie leest PDF’s lokaal met de ingebedde PDF.js 6.4.299 en DOCX via de Word-XML. Hiervoor is een moderne browser nodig die module-workers en `DecompressionStream` ondersteunt. De PDF.js-download is gecontroleerd tegen de officiële SHA-512 uit de npm-pakketmetadata; versie, integriteit en Apache-2.0-licentie staan in `assets/vendor/pdfjs/`. De volledige licentie en beide PDF.js-modules zijn ook in het deelbare HTML-bestand opgenomen. Er is geen CDN nodig. Scans zonder tekst, wachtwoordbeveiliging, onleesbare bestanden en bestanden boven 20 MB worden duidelijk gemeld; wanneer de inhoud niet kan worden gelezen, wordt hooguit de bestandsnaam gebruikt, met een expliciete waarschuwing. PDF’s boven 300 pagina’s en tekst boven 1.000.000 tekens worden niet stilzwijgend afgekapt.
-
-In de Python-app wordt de gekozen bouwblokkenlijst met bronmapping als `Bouwblokkenadvies.md` toegevoegd aan de bronset voor conceptgeneratie. In het losse HTML-bestand staat het advies onder `building_blocks` in de gedownloade bronselectie. Daarin staan ook handmatige afwijkingen, bronkenmerken en eventuele leesproblemen. De JSON kan bewijsfragmenten uit je documenten bevatten: deel deze alleen met bevoegde personen.
-
-### Horizon Rotterdam
-
-De bronkaart verwijst naar de [door de gebruiker opgegeven Horizon Rotterdam-view](https://rotterdam.horizzon.cloud/sites/8579a6d6-9680-4fee-959c-4793130eef6f/views/e059f7c1-e164-f111-bb43-025a1dd2f359). Het klikken op deze link laadt de inhoud niet automatisch in de app. Voeg een PDF-, DOCX-, TXT- of Markdown-export toe om de tekst lokaal mee te wegen. Selecteer de Horizon-kaart en de bijbehorende bestanden; uitgevinkte Horizon-bronnen tellen niet mee.
-
-De Horizon-view kon in de ontwikkelomgeving niet worden uitgelezen: de netwerkproxy weigerde het domein met een 403. Dit bewijst niet dat de Horizon-pagina zelf een login vereist. De additionele Rotterdamse ABB/SBB-mapping en eventuele verplichtingen zijn daarom nog niet geverifieerd of aan de catalogus toegevoegd. Het huidige advies verwijst naar de enterprise-architectuurmapping; onbekende Rotterdamse oplossingen worden niet verzonnen. Domeintoegang is als conceptconfiguratie klaargezet voor beoordeling in de cloudomgevingsinstellingen.
-
-### Het deelbare bestand opnieuw bouwen
-
-De bewerkbare frontend staat in `web/`. Het rootbestand `index.html` wordt daaruit opgebouwd en bevat alle benodigde code en afbeeldingen:
-
-```bash
-python scripts/build_index.py
-```
-
-De broncatalogus bijwerken vanuit een bestaande bronmomentopname kan met `python scripts/update_building_catalogue.py`. Gebruik `--refresh` om eerst de actuele openbare bron op te halen. Bouw daarna `index.html` opnieuw. De trefwoordregels in `architect_agent/building_blocks.py` zijn lokale adviesregels en zijn gescheiden van de letterlijk overgenomen mapping.
-
-Getest: Python-tests, JavaScript/Python-pariteit en browserproeven met onderwerpwijzigingen, handmatige keuzes, TXT/Markdown-, PDF- en DOCX-inhoud, scans, uitvinken en de JSON-download. API-generatie en Notion-publicatie zijn bij deze wijziging niet uitgevoerd. Node.js is alleen nodig voor de optionele pariteitscontrole, niet om de app of het index-bestand te gebruiken.
-
-Onderaan staat de daadwerkelijke bronset met broncodes. Een geselecteerd kader zonder inhoud blokkeert generatie. **Download bronselectie** legt de keuze vast als JSON. **Genereer PSA** gebruikt uitsluitend de gekozen bronnen, controleert lokaal de tekstlimiet en doet pas daarna een AI-aanroep. Bij een te grote bronset wordt niets stilzwijgend afgekapt. Het beoordeelbare concept is als JSON te downloaden; er wordt geen Word-document gemaakt of Notion-publicatie uitgevoerd door deze knop.
-
-Een eerste bronmomentopname voorbereiden (leest een bestaande cache of haalt de openbare bron op):
-
-```bash
-.venv/bin/python -m architect_agent.catalogue
-```
-
-Netwerktoegang tot `raw.githubusercontent.com` is hiervoor nodig. Zonder netwerk blijft een geldige lokale momentopname bruikbaar; anders kun je een eigen versie uploaden. Tests gebruiken synthetische bronnen en gemockte API-aanroepen. De echte enterprise-architectuurbron is opgehaald en de standaard hoofdstukselectie is lokaal op extractie en omvang gecontroleerd. Er zijn geen betaalde AI-aanroepen of Notion-publicaties uitgevoerd voor deze wijziging.
+Voer `.venv/bin/python scripts/build_index.py` uit na wijzigingen in `web/`. Test met `.venv/bin/python -m pytest -q`. De browserproef gebruikt synthetische Horizzon-objecten, geen echte Rotterdamse catalogus. Volledige enterprise-inhoud, ABB/SBB-selectie, bronuitsluiting, PDF en mobiele weergave worden gecontroleerd. AI-aanroepen en publicaties worden uitsluitend gemockt; geen betaalde API-aanroep of echte publicatie voor deze wijziging.
 
 ## Publiceren in Notion
 

@@ -18,10 +18,9 @@ def render_hero():
   <img class="hero-art" src="data:image/png;base64,{artwork}" alt="Conceptvisual van vijf zwevende architectuurlagen met glazen bouwblokken en groene verbindingen">
   <div class="hero-shade"></div>
   <div class="hero-copy">
-    <div class="eyebrow"><span class="live-dot"></span> COMMON GROUND · ARCHITECTUURAGENT</div>
     <h2>Een sterk begin.<br><span>Een helder ontwerp.</span></h2>
     <p>Van projectambitie naar een onderbouwde architectuur.<br>Kies je bronnen. Leg je fundament.</p>
-    <a class="hero-action" href="#generate-psa" target="_self">Genereer PSA <span aria-hidden="true">↗</span></a>
+    <a class="hero-action" href="#generate-psa" target="_self">Genereer PA <span aria-hidden="true">↗</span></a>
   </div>
   <div class="hero-footer"><span><span class="live-dot"></span> Vijf lagen. Eén samenhangend fundament.</span><span class="concept-label">CONCEPTVISUAL</span></div>
 </section>
@@ -34,3 +33,7 @@ def render_steps():
 <a href="#bronnen" target="_self"><span>02</span> Je bronnen</a><i aria-hidden="true">/</i>
 <a href="#concept" target="_self"><span>03</span> Je architectuur</a>
 </nav>''', unsafe_allow_html=True)
+
+
+def logo_data():
+    return "data:image/svg+xml;base64,"+base64.b64encode((ASSETS/"rotterdam/logo.svg").read_bytes()).decode("ascii")

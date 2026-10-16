@@ -39,7 +39,7 @@ def generate_plan(sources: list[Source], scope: str, goals: str, model: str | No
         raise RuntimeError('OPENAI_API_KEY ontbreekt. Stel deze lokaal in voordat je AI-generatie gebruikt.')
     model = model or os.environ.get('OPENAI_MODEL', 'gpt-4.1')
     purpose = (
-        'Maak een NIEUWE projectstartarchitectuur (PSA) voor dit project op basis van uitsluitend '
+        'Maak een NIEUWE projectarchitectuur (PA) voor dit project op basis van uitsluitend '
         'de geselecteerde bronnen. Gebruik changes voor voorgestelde architectuurkeuzes, hun '
         'onderbouwing en bronverwijzingen. De enterprise architectuur is een kader als deze is '
         'aangeleverd; verzin geen inhoud van ontbrekende kaders. Benoem ontbrekende informatie '
@@ -56,7 +56,7 @@ def generate_plan(sources: list[Source], scope: str, goals: str, model: str | No
     response = client.responses.create(
         model=model,
         instructions=INSTRUCTIONS.replace('een concept-update voor een bestaand solutionarchitectuurdocument.',
-            'een nieuwe concept-projectstartarchitectuur (PSA).' if project_start else
+            'een nieuwe concept-projectarchitectuur (PA).' if project_start else
             'een concept-update voor een bestaand solutionarchitectuurdocument.'),
         input=prompt,
         text={"format":{"type":"json_schema","name":"architectuur_update","strict":True,"schema":UPDATE_SCHEMA}},

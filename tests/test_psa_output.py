@@ -129,7 +129,7 @@ def test_ai_generation_sends_only_selected_sources(plan):
 
 def test_ai_generation_rejects_oversized_sources_before_api():
     data={'allow_ai':True,'brand':'Rotterdam','project':'Project','goals':'Doel',
-          'sources':[{'key':'B00','filename':'lang.md','pages':1,'text':'x'*155001}]}
+          'sources':[{'key':'B00','filename':'lang.md','pages':1,'text':'x'*900001}]}
     with patch('publication_service.generate_plan') as ai:
-        with pytest.raises(ValueError,match='155.000'):generate(data,{'OPENAI_API_KEY':'test-only'})
+        with pytest.raises(ValueError,match='900.000'):generate(data,{'OPENAI_API_KEY':'test-only'})
         ai.assert_not_called()

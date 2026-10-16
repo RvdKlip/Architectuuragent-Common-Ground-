@@ -7,6 +7,8 @@ import re
 import fitz
 from docx import Document
 
+SOURCE_LIMIT = 900_000
+
 SUPPORTED = {".pdf", ".docx", ".txt", ".md"}
 
 
@@ -71,7 +73,7 @@ def extract(path: Path, key: str) -> Source:
     return Source(key, path.name, cleaned, n_pages, suffix[1:])
 
 
-def collect(paths: list[Path], *, base_doc: Path | None = None, limit: int = 155_000) -> list[Source]:
+def collect(paths: list[Path], *, base_doc: Path | None = None, limit: int = SOURCE_LIMIT) -> list[Source]:
     all_paths = ([Path(base_doc)] if base_doc else []) + [Path(p) for p in paths]
     result = [extract(p, f"B{i:02d}") for i, p in enumerate(all_paths)]
     size = sum(len(s.text) for s in result)

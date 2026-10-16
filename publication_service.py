@@ -10,7 +10,7 @@ import json
 import os
 import threading
 
-from architect_agent.sources import Source
+from architect_agent.sources import Source, SOURCE_LIMIT
 from architect_agent.schemas import validate
 from architect_agent.output import house_style
 from architect_agent.notion import publish_plan as notion_publish
@@ -28,8 +28,8 @@ def generate(payload, environment):
                for item in payload['sources']]
     if not sources or len(sources)>99 or [s.key for s in sources] != [f'B{i:02d}' for i in range(len(sources))]:
         raise ValueError('Ongeldige bronselectie of bronvolgorde.')
-    if sum(len(source.text) for source in sources)>155000:
-        raise ValueError('De AI-bronset overschrijdt 155.000 tekens. Selecteer minder bronnen of hoofdstukken.')
+    if sum(len(source.text) for source in sources)>SOURCE_LIMIT:
+        raise ValueError('De AI-bronset overschrijdt 900.000 tekens. Verklein aanvullende projectbronnen; de enterprise architectuur wordt niet afgekapt.')
     if not str(payload['project']).strip() or not str(payload['goals']).strip():
         raise ValueError('Vul projectnaam en afbakening in.')
     plan = generate_plan(sources, payload['project'], payload['goals'], environment.get('OPENAI_MODEL'), project_start=True)
@@ -38,7 +38,7 @@ def generate(payload, environment):
 
 def publish(payload, environment, completed):
     if payload.get('reviewed') is not True:
-        raise ValueError('Beoordeel de PSA en bevestig de publicatie eerst.')
+        raise ValueError('Beoordeel de PA en bevestig de publicatie eerst.')
     brand = payload['brand']; house_style(brand)
     plan = payload['plan']
     sources = [Source(str(item['key']), str(item['filename']), '', int(item['pages']), 'tekst')
@@ -111,7 +111,7 @@ def make_handler(environment):
                 return self.answer(404, {'error':'Onbekend endpoint.'})
             try:
                 length = int(self.headers.get('Content-Length','0'))
-                if not 0 < length <= 2000000:
+                if not 0 < length <= 8000000:
                     raise ValueError('Ongeldige of te grote publicatieaanvraag.')
                 payload = json.loads(self.rfile.read(length))
                 if self.path == '/generate':
@@ -127,7 +127,7 @@ def make_handler(environment):
                         result = publish(payload, environment, completed)
                     self.answer(200, {'results':result})
             except (ValueError, TypeError, KeyError, AttributeError):
-                self.answer(400, {'error':'Ongeldige PSA, huisstijl of publicatiekeuze.'})
+                self.answer(400, {'error':'Ongeldige PA, huisstijl of publicatiekeuze.'})
     return Handler
 
 

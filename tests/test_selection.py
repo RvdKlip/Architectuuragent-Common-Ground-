@@ -52,7 +52,7 @@ def test_fenced_code_does_not_create_chapters():
 def test_missing_sources_are_not_treated_as_available():
     docs = [SelectedDocument('enterprise', 'ea.md', b'inhoud')]
     assert not missing_sources(['enterprise'], docs)
-    assert missing_sources(['enterprise', 'policy'], docs) == ['Privacy- en beveiligingskaders']
+    assert missing_sources(['enterprise', 'horizon'], docs) == ['Bouwstenen Rotterdam']
     assert missing_sources(['enterprise'], [SelectedDocument('enterprise', 'ea.md', b'')])
 
 
@@ -98,44 +98,46 @@ def test_psa_request_asks_for_new_architecture_with_selected_sources(snapshot, p
         client.return_value.responses.create.return_value.output_text = json.dumps(plan)
         assert generate_plan(sources, 'Testproject', 'Testdoel', project_start=True) == plan
     request = client.return_value.responses.create.call_args.kwargs
-    assert 'NIEUWE projectstartarchitectuur' in request['input']
-    assert 'nieuwe concept-projectstartarchitectuur' in request['instructions']
+    assert 'NIEUWE projectarchitectuur' in request['input']
+    assert 'nieuwe concept-projectarchitectuur' in request['instructions']
     assert 'B00 tekst' in request['input']
     assert 'niet-geselecteerde tekst' not in request['input']
 
 
 def test_source_limit_stops_before_api_call(tmp_path):
-    path = tmp_path/'large.md'; path.write_text('Veel te lange brontekst. ' * 10000)
+    path = tmp_path/'large.md'; path.write_text('Veel te lange brontekst. ' * 50000)
     with patch('architect_agent.workflow.generate_plan') as generate:
         with pytest.raises(ValueError, match='overschrijdt'):
             prepare(None, [path], 'Project', 'Doel', project_start=True)
         generate.assert_not_called()
 
 
-def test_psa_screen_generates_from_selected_chapters(snapshot, plan, tmp_path):
+def test_pa_screen_generates_from_all_chapters(snapshot, plan, tmp_path):
     cache = tmp_path/'cache'; cache.touch()
     with patch('architect_agent.selection_ui.CACHE', cache), \
          patch('architect_agent.selection_ui.load_enterprise', return_value=snapshot), \
          patch('architect_agent.workflow.generate_plan', return_value=plan) as generate:
         at = AppTest.from_file(str(Path(__file__).parents[1]/'app.py')).run(timeout=30)
         assert not at.exception
-        assert at.title[0].value == 'Projectstartarchitectuur'
+        assert at.title[0].value == 'Projectarchitectuur'
         assert at.checkbox(key='use_enterprise').value
         assert any('Enterprise architectuur Platform Dienstverlening' in c.label for c in at.checkbox)
         generate.assert_not_called()
         at.text_input(key='project_name').set_value('Nieuw dienstverleningsproject')
         at.text_area(key='project_goals').set_value('Maak dienstverlening toegankelijker.').run()
-        button = next(b for b in at.button if b.label == 'Genereer PSA')
+        button = next(b for b in at.button if b.label == 'Genereer PA')
         assert not button.disabled
         # Een geselecteerd kader zonder inhoud blokkeert generatie.
-        at.checkbox(key='use_policy').check().run()
-        assert next(b for b in at.button if b.label == 'Genereer PSA').disabled
-        at.checkbox(key='use_policy').uncheck().run()
-        next(b for b in at.button if b.label == 'Genereer PSA').click().run()
+        at.checkbox(key='use_horizon').check().run()
+        assert next(b for b in at.button if b.label == 'Genereer PA').disabled
+        at.checkbox(key='use_horizon').uncheck().run()
+        next(b for b in at.button if b.label == 'Genereer PA').click().run()
         assert not at.exception
         assert generate.call_count == 1
         assert generate.call_args.kwargs == {'project_start': True}
-        assert 'niet-geselecteerde tekst' not in generate.call_args.args[0][0].text
+        assert snapshot['text'].strip() in generate.call_args.args[0][0].text
+        assert not at.multiselect
+        assert at.session_state['agent_selection']['enterprise_architecture']['all_chapters']
         assert at.session_state['agent_base'] is None
         assert at.session_state['agent_selection']['project'] == 'Nieuw dienstverleningsproject'
 
@@ -149,4 +151,4 @@ def test_enterprise_deselection_excludes_source(snapshot, tmp_path):
         assert not at.exception
         assert at.metric[0].value == '0'
         assert not at.dataframe
-        assert next(b for b in at.button if b.label == 'Genereer PSA').disabled
+        assert next(b for b in at.button if b.label == 'Genereer PA').disabled

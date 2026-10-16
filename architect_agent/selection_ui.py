@@ -1,151 +1,113 @@
-"""Streamlit-scherm om de bronset voor een PSA samen te stellen."""
+"""Selecteer bronnen voor een projectarchitectuur; enterprise architectuur altijd volledig."""
 import hashlib
 import json
-
 import streamlit as st
-
-from .catalogue import (
-    CACHE, ENTERPRISE_GITHUB, ENTERPRISE_GITBOOK,
-    chapter_document, chapters, load_enterprise,
-)
+from .catalogue import CACHE, ENTERPRISE_GITHUB, ENTERPRISE_GITBOOK, load_enterprise
 from .selection import HORIZON_URL, SOURCE_OPTIONS, SelectedDocument, missing_sources
 from .presentation import render_hero, render_steps
-from .building_blocks_ui import render_building_blocks
-from .building_blocks import advice_document
+from .horizzon import parse_export
 
 
 def render_selection() -> dict:
-    st.title('Projectstartarchitectuur')
+    st.title('Projectarchitectuur')
     st.caption('Jouw project. Jouw bronnen. Eén helder vertrekpunt.')
     render_hero()
     render_steps()
     st.markdown('<div id="project"></div>', unsafe_allow_html=True)
-    with st.container(border=True, key='project_card'):
+    with st.container(border=True):
         st.subheader('1. Welk project start je?')
         left, right = st.columns([2, 1])
         with left:
             scope = st.text_input('Projectnaam', placeholder='Bijvoorbeeld: Signaalmanagement', key='project_name')
         with right:
-            mode = st.selectbox('Type architectuur', ['Nieuwe projectstartarchitectuur', 'Bestaande architectuur bijwerken'])
-        goals = st.text_area('Doel en afbakening', placeholder='Wat wil het project bereiken? Welke processen en voorzieningen vallen binnen de scope?', key='project_goals', height=100)
-    project_start = mode == 'Nieuwe projectstartarchitectuur'
-    base = None
-    if not project_start:
-        base = st.file_uploader('Bestaande solutionarchitectuur (Word)', type=['docx'], key='base')
-
+            mode = st.selectbox('Type architectuur', ['Nieuwe projectarchitectuur', 'Bestaande architectuur bijwerken'])
+        goals = st.text_area('Doel en afbakening', key='project_goals', height=100)
+    project_start = mode == 'Nieuwe projectarchitectuur'
+    base = None if project_start else st.file_uploader('Bestaande solutionarchitectuur (Word)', type=['docx'], key='base')
     st.markdown('<div id="bronnen"></div>', unsafe_allow_html=True)
     st.subheader('2. Bouw je fundament')
-    st.write('De enterprise architectuur staat voor je klaar. Vul deze naar behoefte aan met projectdocumenten en andere kaders.')
-    documents = []
-    selected = []
+    documents, selected = [], []
     enterprise_metadata = None
-    columns = st.columns(2)
-    for index, option in enumerate(SOURCE_OPTIONS):
-        column_index = 0 if index == 0 else (index+1) % 2
-        with columns[column_index], st.container(border=True, key='source_'+option.key):
-            enabled = st.checkbox(option.title, value=option.key == 'enterprise', key='use_'+option.key)
-            st.caption(option.description)
-            if enabled:
-                selected.append(option.key)
-            if option.key == 'enterprise':
-                st.markdown(f'[Lees in GitBook]({ENTERPRISE_GITBOOK}) · [Bekijk Markdown op GitHub]({ENTERPRISE_GITHUB})')
-                st.caption('Openbare bron · selecteer hieronder de relevante hoofdstukken')
-                data = None
-                if CACHE.exists():
-                    try:
-                        data = load_enterprise()
-                    except (ValueError, KeyError, OSError):
-                        st.warning('De lokale bron kan niet worden gelezen. Haal de bron opnieuw op.')
-                if st.button('Bron vernieuwen' if data else 'Enterprise architectuur ophalen', key='refresh_enterprise', disabled=not enabled):
-                    try:
-                        with st.spinner('Openbare enterprise architectuur ophalen...'):
-                            data = load_enterprise(refresh=True)
-                        st.success('Bron opgehaald.')
-                    except Exception:
-                        st.error('Ophalen is niet gelukt. Controleer netwerktoegang tot raw.githubusercontent.com of upload een eigen versie.')
-                enterprise_mode = st.radio('Versie van de enterprise architectuur', ['Openbare GitHub-bron', 'Eigen versie uploaden'], key='enterprise_mode', horizontal=True, disabled=not enabled)
-                if enterprise_mode == 'Openbare GitHub-bron' and data:
-                    sections = chapters(data['text'])
-                    labels = {chapter.key: chapter.title for chapter in sections}
-                    defaults = [c.key for c in sections if c.title in ('Managementsamenvatting', 'Visie, principes, scope')]
-                    chosen = st.multiselect('Hoofdstukken om mee te nemen', list(labels), default=defaults,
-                                            format_func=labels.get, key='enterprise_chapters_'+data['sha256'], disabled=not enabled)
-                    st.caption(f"Momentopname {data['retrieved_at'][:10]} · bronkenmerk {data['sha256'][:12]} · {len(data['text']):,} tekens totaal")
-                    if enabled and chosen:
-                        text = chapter_document(data, chosen)
-                        documents.append(SelectedDocument('enterprise', 'Enterprise-architectuur-selectie.md', text.encode('utf-8')))
-                        enterprise_metadata = {k: data[k] for k in ('url', 'sha256', 'retrieved_at')}
-                        enterprise_metadata['chapters'] = [labels[key] for key in chosen]
-                        st.success(f'{len(chosen)} hoofdstukken geselecteerd · {len(text):,} tekens')
-                        if len(text) > 155000:
-                            st.warning('Deze selectie overschrijdt de bronlimiet. Kies minder hoofdstukken; er wordt niets automatisch afgekapt.')
-                        with st.expander('Inhoud van de selectie bekijken'):
-                            st.text_area('Geselecteerde brontekst', text, height=220, disabled=True)
-                    elif enabled:
-                        st.info('Selecteer minstens één hoofdstuk.')
-                elif enterprise_mode == 'Openbare GitHub-bron' and enabled:
-                    st.info('Haal de bron op om hoofdstukken te selecteren, of upload een eigen versie.')
-                if enterprise_mode == 'Eigen versie uploaden':
-                    files = st.file_uploader('Enterprise architectuur uploaden', type=['pdf', 'docx', 'txt', 'md'],
-                                             accept_multiple_files=True, key='files_enterprise', disabled=not enabled)
-                    if enabled:
-                        documents.extend(SelectedDocument(option.key, f.name, f.getvalue()) for f in files or [])
-            else:
-                if option.key == 'horizon':
-                    st.markdown('[Open Horizon Rotterdam ↗]('+HORIZON_URL+')')
-                    st.caption('De link alleen wordt niet ingelezen. Voeg een Horizon-export toe om de inhoud lokaal mee te wegen in het advies. Rotterdamse oplossingen worden niet verzonnen of als verplicht aangemerkt zonder bronbewijs.')
-                st.caption('Eigen bron toevoegen · ' + option.purpose)
-                files = st.file_uploader('Documenten toevoegen', type=['pdf', 'docx', 'txt', 'md'],
-                                         accept_multiple_files=True, key='files_'+option.key, disabled=not enabled)
-                if enabled:
-                    documents.extend(SelectedDocument(option.key, f.name, f.getvalue()) for f in files or [])
-                    st.caption(f'{len(files or [])} bestanden toegevoegd' if files else 'Nog geen document toegevoegd')
-        if index == 0:
-            building_blocks_slot = columns[1].container(border=True, key='building_blocks_card')
-
+    building_blocks = {'selected': [], 'source': {'url': HORIZON_URL}}
+    left, right = st.columns(2)
+    with left, st.container(border=True):
+        enabled = st.checkbox(SOURCE_OPTIONS[0].title, value=True, key='use_enterprise')
+        if enabled:
+            selected.append('enterprise')
+        st.caption('Alle hoofdstukken worden volledig meegenomen.')
+        st.markdown(f'[Lees in GitBook]({ENTERPRISE_GITBOOK}) · [Bekijk op GitHub]({ENTERPRISE_GITHUB})')
+        data = None
+        if CACHE.exists():
+            try:
+                data = load_enterprise()
+            except (ValueError, KeyError, OSError):
+                st.warning('De lokale bron is niet leesbaar. Haal de bron opnieuw op.')
+        if st.button('Bron vernieuwen' if data else 'Enterprise architectuur ophalen', key='refresh_enterprise', disabled=not enabled):
+            try:
+                data = load_enterprise(refresh=True)
+            except Exception:
+                st.error('Ophalen is niet gelukt. Upload een eigen versie of controleer de verbinding.')
+        enterprise_mode = st.radio('Versie van de enterprise architectuur', ['Openbare GitHub-bron', 'Eigen versie uploaden'], horizontal=True, disabled=not enabled)
+        if enterprise_mode == 'Openbare GitHub-bron':
+            if data and enabled:
+                documents.append(SelectedDocument('enterprise', 'Enterprise-architectuur-volledig.md', data['text'].encode('utf-8')))
+                enterprise_metadata = {k: data[k] for k in ('url', 'sha256', 'retrieved_at')}
+                enterprise_metadata['all_chapters'] = True
+                st.success(f"Volledige bron · {len(data['text']):,} tekens")
+            elif enabled:
+                st.info('Haal de volledige bron op of upload een eigen versie.')
+        else:
+            uploaded = st.file_uploader('Eigen versie uploaden', type=['pdf', 'docx', 'txt', 'md'], key='files_enterprise', disabled=not enabled)
+            if uploaded and enabled:
+                documents.append(SelectedDocument('enterprise', uploaded.name, uploaded.getvalue()))
+    with right, st.container(border=True):
+        enabled = st.checkbox('Bouwstenen Rotterdam', key='use_horizon')
+        if enabled:
+            selected.append('horizon')
+        st.markdown('[Open bouwstenen in Horizzon ↗]('+HORIZON_URL+')')
+        st.caption('Een ingelogde Horizzon-sessie kan niet worden overgenomen. Importeer een CSV- of JSON-export om echte Rotterdamse ABB’s en SBB’s te selecteren.')
+        uploaded = st.file_uploader('Bouwstenencatalogus uit Horizzon', type=['csv', 'json'], key='horizzon_catalogue', disabled=not enabled)
+        if uploaded and enabled:
+            try:
+                blocks, skipped = parse_export(uploaded.getvalue(), uploaded.name)
+                digest = hashlib.sha256(uploaded.getvalue()).hexdigest()
+                st.caption(f'{len(blocks)} bouwstenen geladen; {skipped} objecten zonder bruikbare ABB/SBB-classificatie overgeslagen.')
+                chosen = []
+                for kind in ('ABB', 'SBB'):
+                    candidates = {b['id']: b for b in blocks if b['type'] == kind}
+                    ids = st.multiselect(kind+'’s', list(candidates), format_func=lambda key: candidates[key]['name'], key='horizzon_'+kind+'_'+digest)
+                    chosen.extend(candidates[key] for key in ids)
+                building_blocks = {'selected': chosen, 'source': {'url': HORIZON_URL, 'export': uploaded.name, 'sha256': digest}, 'method': 'Handmatige selectie uit aangeleverde Horizzon-export.'}
+                if chosen:
+                    text = '# Geselecteerde Rotterdamse bouwstenen — VOORSTEL, te beoordelen\n\n'+f'Bron: {HORIZON_URL}\nExport: {uploaded.name}\nSHA-256: {digest}\n\n'+'\n\n'.join(b['type']+': '+b['name']+'\nObject-ID: '+b['id']+'\n'+b['description'] for b in chosen)
+                    documents.append(SelectedDocument('horizon', 'Bouwstenen-Rotterdam-selectie.md', text.encode('utf-8')))
+            except (ValueError, UnicodeError, TypeError, AttributeError) as error:
+                st.error(str(error))
+        with st.expander('Welke exportvelden zijn nodig?'):
+            st.caption('CSV (komma of puntkomma) of JSON-lijst: id, name, type (ABB of SBB), optioneel description. Ook naam, beschrijving en bouwsteentype worden herkend. Andere objecttypen worden overgeslagen.')
     with st.container(border=True):
-        st.markdown('**Projectdocumenten en overige bronnen**')
-        st.caption('Bijvoorbeeld de projectopdracht, requirements, procesbeschrijvingen of een eerdere architectuur. Vink per bestand aan of het mee moet.')
+        st.subheader('Projectdocumenten en overige bronnen')
         extra = st.file_uploader('Projectbronnen uploaden', type=['pdf', 'docx', 'txt', 'md'], accept_multiple_files=True, key='project_sources')
         for index, file in enumerate(extra or []):
             digest = hashlib.sha256(file.getvalue()).hexdigest()[:16]
             if st.checkbox(file.name, value=True, key=f'extra_{index}_{digest}'):
                 documents.append(SelectedDocument('project', file.name, file.getvalue()))
-
-    with building_blocks_slot:
-        building_blocks, building_catalogue = render_building_blocks(scope, goals, documents, base)
-    if building_blocks['selected']:
-        documents.append(SelectedDocument('building_blocks', 'Bouwblokkenadvies.md',
-                                         advice_document(building_blocks, building_catalogue).encode('utf-8')))
-
     missing = missing_sources(selected, documents)
     st.subheader('Jouw bronselectie')
     a, b, c = st.columns(3)
     a.metric('Bronbestanden', len(documents) + int(base is not None))
     b.metric('Geselecteerde kaders', len(selected))
     c.metric('Nog aan te vullen', len(missing))
-    rows = []
-    offset = 0
-    if base:
-        rows.append({'Broncode': 'B00', 'Bron': base.name, 'Categorie': 'Bestaande architectuur'})
-        offset = 1
+    rows = [{'Broncode': 'B00', 'Bron': base.name, 'Categorie': 'Bestaande architectuur'}] if base else []
     titles = {o.key: o.title for o in SOURCE_OPTIONS}
-    titles['building_blocks'] = 'Bouwblokkenadvies — te beoordelen'
-    for index, document in enumerate(documents, offset):
-        rows.append({'Broncode': f'B{index:02d}', 'Bron': document.name,
-                     'Categorie': titles.get(document.category, 'Projectdocument')})
+    for index, document in enumerate(documents, int(base is not None)):
+        rows.append({'Broncode': f'B{index:02d}', 'Bron': document.name, 'Categorie': titles.get(document.category, 'Projectdocument')})
     if rows:
         st.dataframe(rows, hide_index=True, width='stretch')
-        st.caption('Alleen deze bestanden worden gebruikt, in deze volgorde. Andere documenten en niet-geselecteerde hoofdstukken worden niet ingelezen.')
-    else:
-        st.info('Selecteer een bron en voeg de bijbehorende inhoud toe om te beginnen.')
     if missing:
         st.warning('Nog inhoud nodig voor: ' + '; '.join(missing))
-    manifest = {'project': scope, 'goals': goals, 'type': mode, 'sources': rows,
-                'missing': missing, 'enterprise_architecture': enterprise_metadata,
-                'building_blocks': building_blocks,
-                'horizon': {'url': HORIZON_URL, 'content_loaded': any(d.category == 'horizon' for d in documents)}}
-    st.download_button('Download bronselectie', json.dumps(manifest, ensure_ascii=False, indent=2),
-                       file_name='bronselectie.json', mime='application/json')
-    return {'project_start': project_start, 'scope': scope, 'goals': goals, 'base': base,
-            'documents': documents, 'missing': missing, 'manifest': manifest}
+    manifest = {'project': scope, 'goals': goals, 'type': mode, 'sources': rows, 'missing': missing,
+                'enterprise_architecture': enterprise_metadata, 'building_blocks': building_blocks,
+                'horizon': {'url': HORIZON_URL, 'content_loaded': bool(building_blocks['selected'])}}
+    st.download_button('Download bronselectie', json.dumps(manifest, ensure_ascii=False, indent=2), file_name='bronselectie.json', mime='application/json')
+    return {'project_start': project_start, 'scope': scope, 'goals': goals, 'base': base, 'documents': documents, 'missing': missing, 'manifest': manifest}

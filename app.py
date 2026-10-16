@@ -14,16 +14,15 @@ from architect_agent.notion import publish_plan, NotionPublishError
 from architect_agent.sources import collect
 from architect_agent.selection import write_documents
 from architect_agent.selection_ui import render_selection
-from architect_agent.presentation import apply_style
+from architect_agent.presentation import apply_style, logo_data
 from architect_agent.output import report_pdf, report_html
 from architect_agent.confluence import publish_plan as publish_confluence
 
-st.set_page_config(page_title='Projectstartarchitectuur · Common Ground',page_icon='🏛️',layout='wide')
+st.set_page_config(page_title='Architectuuragent · Projectarchitectuur',page_icon='🏛️',layout='wide')
 apply_style()
 
 with st.sidebar:
-    st.markdown('''<div class="sidebar-brand"><span class="brand-monogram">CG</span><div><strong>Common Ground</strong><small>ARCHITECT WORKSPACE</small></div></div>
-<nav class="workspace-nav" aria-label="Werkruimte"><a href="#project" target="_self"><span>◈</span> Projectstartarchitectuur</a><a href="#bronnen" target="_self"><span>▤</span> Bronselectie</a><a href="#concept" target="_self"><span>◇</span> Concept & review</a></nav>''',unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-brand"><img style="width:185px;background:white;padding:12px;border-radius:5px" alt="Gemeente Rotterdam" src="'+logo_data()+'"><strong>Architectuuragent</strong></div><nav class="workspace-nav"><a href="#project" target="_self">Projectarchitectuur</a><a href="#bronnen" target="_self">Bronselectie</a><a href="#concept" target="_self">Concept & review</a></nav>',unsafe_allow_html=True)
     with st.expander('AI-instellingen'):
         model=st.text_input('OpenAI-model',os.getenv('OPENAI_MODEL','gpt-4.1'))
         api_key=st.text_input('OPENAI_API_KEY (optioneel)',type='password',help='Of stel de sleutel in als omgevingsvariabele. Wordt niet in outputbestanden bewaard.')
@@ -46,11 +45,10 @@ documents=selection['documents']
 scope=selection['scope']
 goals=selection['goals']
 selection_ready=bool(documents) and not selection['missing']
-budget_ok=(not selection['manifest']['enterprise_architecture']
-           or len(documents[0].content.decode('utf-8'))<=155000)
+budget_ok=True
 st.markdown('<div id="concept"></div>',unsafe_allow_html=True)
 st.markdown('<div id="generate-psa"></div>',unsafe_allow_html=True)
-st.subheader('3. Genereer je PSA')
+st.subheader('3. Genereer je PA')
 brand=st.radio('In welke huisstijl?', ['Rotterdam','Common Ground'],horizontal=True,key='output_brand')
 st.markdown('**Welke uitvoer en publicatie?**')
 output_columns=st.columns(3)
@@ -85,7 +83,7 @@ if st.button('Laad bestaand concept',disabled=not (review_upload and selection_r
 can_generate=selection_ready and budget_ok and bool(scope.strip()) and bool(goals.strip()) and (selection['project_start'] or base is not None) and any([output_pdf,output_confluence,output_notion])
 if not scope.strip() or not goals.strip():
     st.info('Vul een projectnaam en doel/afbakening in om een concept te maken.')
-if st.button('Genereer PSA' if selection['project_start'] else 'Genereer concept-update',type='primary',disabled=not can_generate,key='generate_psa'):
+if st.button('Genereer PA' if selection['project_start'] else 'Genereer concept-update',type='primary',disabled=not can_generate,key='generate_psa'):
     try:
         if api_key: os.environ['OPENAI_API_KEY']=api_key
         root=Path(tempfile.mkdtemp(prefix='cg_architectuur_'))
@@ -121,10 +119,10 @@ if 'agent_plan_json' in st.session_state:
         output_plan=json.loads(modified)
         if output_pdf:
             pdf_bytes=report_pdf(output_plan,st.session_state['agent_sources'],brand)
-            st.download_button('Download PSA als PDF — '+brand,pdf_bytes,file_name='PSA-'+brand.replace(' ','-')+'.pdf',mime='application/pdf')
-        st.download_button('Download opgemaakte PSA — '+brand,report_html(output_plan,st.session_state['agent_sources'],brand),file_name='PSA-'+brand.replace(' ','-')+'.html',mime='text/html')
+            st.download_button('Download PA als PDF — '+brand,pdf_bytes,file_name='PA-'+brand.replace(' ','-')+'.pdf',mime='application/pdf')
+        st.download_button('Download opgemaakte PA — '+brand,report_html(output_plan,st.session_state['agent_sources'],brand),file_name='PA-'+brand.replace(' ','-')+'.html',mime='text/html')
     except Exception:
-        st.info('Herstel de concept-JSON voordat je de PSA-uitvoer downloadt.')
+        st.info('Herstel de concept-JSON voordat je de PA-uitvoer downloadt.')
     if output_notion:
         st.caption('Notion krijgt bewerkbare tekst: samenvatting, wijzigingen, vijf lagen, gegevensstroom, ADR, regels en bronoverzicht. Diagramafbeeldingen worden in deze eerste versie niet geüpload.')
         publication_key=hashlib.sha256((modified+notion_parent+brand+repr(st.session_state['agent_sources'])).encode()).hexdigest()
@@ -148,16 +146,16 @@ if 'agent_plan_json' in st.session_state:
                 st.error('Publicatie gestopt. Controleer het concept, de pagina-ID en de integratie-instellingen.')
     if output_confluence:
         confluence_key=hashlib.sha256((modified+brand+confluence_url+confluence_space+confluence_parent).encode()).hexdigest()
-        confluence_reviewed=st.checkbox('Ik heb de PSA beoordeeld en mag deze in Confluence publiceren.',key='confluence_review_'+confluence_key)
+        confluence_reviewed=st.checkbox('Ik heb de PA beoordeeld en mag deze in Confluence publiceren.',key='confluence_review_'+confluence_key)
         published_confluence=st.session_state.setdefault('confluence_publications',{})
         if confluence_key in published_confluence:
-            st.link_button('Open de gepubliceerde PSA in Confluence',published_confluence[confluence_key]['url'])
-        if st.button('Publiceer PSA in Confluence',disabled=not(confluence_reviewed and confluence_url and confluence_email and confluence_token and confluence_space) or confluence_key in published_confluence):
+            st.link_button('Open de gepubliceerde PA in Confluence',published_confluence[confluence_key]['url'])
+        if st.button('Publiceer PA in Confluence',disabled=not(confluence_reviewed and confluence_url and confluence_email and confluence_token and confluence_space) or confluence_key in published_confluence):
             try:
                 result=publish_confluence(json.loads(modified),st.session_state['agent_sources'],brand,confluence_url,confluence_email,confluence_token,confluence_space,confluence_parent)
                 published_confluence[confluence_key]=result
-                st.success('PSA gepubliceerd als nieuwe Confluence-pagina in de gekozen huisstijl.')
-                st.link_button('Open de PSA in Confluence',result['url'])
+                st.success('PA gepubliceerd als nieuwe Confluence-pagina in de gekozen huisstijl.')
+                st.link_button('Open de PA in Confluence',result['url'])
             except Exception as error:
                 st.error('Confluence-publicatie niet bevestigd: '+str(error))
     if st.button('Optioneel · Maak Word en diagrammen',disabled=not st.session_state.get('agent_base')):

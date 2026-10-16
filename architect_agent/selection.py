@@ -1,4 +1,4 @@
-"""Bronkeuze voor een projectstartarchitectuur; broninhoud wordt nooit ingevuld."""
+"""Bronkeuze voor een projectarchitectuur; broninhoud wordt nooit ingevuld."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -19,15 +19,9 @@ SOURCE_OPTIONS = (
     SourceOption('enterprise', 'Enterprise architectuur Platform Dienstverlening',
                  'Het overkoepelende architectuurkader voor het platform.',
                  'Kaders, doelarchitectuur en samenhang met het platform.'),
-    SourceOption('horizon', 'Horizon Rotterdam',
-                 'Voeg de Rotterdamse kaders, bouwstenen en oplossingen uit Horizon toe.',
-                 'Rotterdamse bouwblokken en solutions toetsen aan de aangeleverde Horizon-bron.'),
-    SourceOption('adrs', 'Bestaande architectuurbesluiten (ADR’s)',
-                 'Selecteer de vastgestelde besluiten die dit project raken.',
-                 'Bestaande besluiten en hun status expliciet meenemen.'),
-    SourceOption('policy', 'Privacy- en beveiligingskaders',
-                 'Voeg de geldende eisen voor privacy en informatiebeveiliging toe.',
-                 'Randvoorwaarden, risico’s en benodigde toetsing.'),
+    SourceOption('horizon', 'Bouwstenen Rotterdam',
+                 'Selecteer ABB’s en SBB’s uit een Horizzon-export.',
+                 'Rotterdamse bouwstenen uit de aangeleverde bron.'),
 )
 
 

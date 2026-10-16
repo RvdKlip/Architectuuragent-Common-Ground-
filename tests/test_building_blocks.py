@@ -105,23 +105,11 @@ def test_python_upload_reader_uses_pdf_docx_and_deselected_docs(tmp_path):
     assert all('algemene kader' not in c['text'] for c in contexts)
 
 
-def test_streamlit_auto_choices_manual_reset_and_psa_source():
+def test_streamlit_removed_sections_and_no_automatic_building_block_source():
     at = AppTest.from_file(str(ROOT/'app.py')).run(timeout=30)
     at.text_input(key='project_name').set_value('Digitale formulieren').run()
     assert not at.exception
-    catalogue = load_catalogue()
-    form = next(b for b in catalogue['abbs'] if b['name'] == 'Digitale formulieren aanbiedt en verwerkt')
-    choice = 'building_block_'+form['id']
-    assert at.checkbox(key=choice).value
-    at.checkbox(key=choice).uncheck().run()
-    assert not at.checkbox(key=choice).value
-    at.text_area(key='project_goals').set_value('Ook digitale formulieren voor aanvragen.').run()
-    assert not at.checkbox(key=choice).value
-    at.button(key='reset_building_blocks').click().run()
-    assert at.checkbox(key=choice).value
-    # Advies wordt daadwerkelijk aan de bronset toegevoegd voor conceptgeneratie.
-    assert any('Bouwblokkenadvies.md' in frame.value['Bron'].tolist() for frame in at.dataframe)
-    at.text_input(key='project_name').set_value('Autorisatie').run()
-    at.text_area(key='project_goals').set_value('Toegang via authenticatie.').run()
-    assert not at.checkbox(key=choice).value
-    assert not at.exception
+    assert not any(c.key and c.key.startswith('building_block_') for c in at.checkbox)
+    assert not any(c.key in ('use_adrs', 'use_policy') for c in at.checkbox)
+    assert at.checkbox(key='use_horizon').label == 'Bouwstenen Rotterdam'
+    assert not any('Bouwblokkenadvies.md' in frame.value['Bron'].tolist() for frame in at.dataframe)
