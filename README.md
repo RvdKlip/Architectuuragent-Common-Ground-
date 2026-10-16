@@ -1,5 +1,11 @@
 # Common Ground Architectuuragent
 
+## Direct openen zonder installatie
+
+Download `index.html` en open dit bestand met een dubbelklik in je browser. Het donkere app-scherm en de architectuurafbeelding zitten samen in dit ene bestand; hiervoor is geen Python, Streamlit of webserver nodig.
+
+Je kunt projectgegevens invullen, bronnen selecteren, lokale documenten kiezen, de openbare enterprise architectuur ophalen en hoofdstukken selecteren, en de bronselectie als JSON downloaden. Voor het ophalen van de openbare bron is internet nodig; een eigen versie uploaden werkt ook zonder internet. Lokale documenten worden in dit scherm alleen geselecteerd, niet inhoudelijk geanalyseerd of verstuurd. Het JSON-bestand bevat de bronkeuze en bestandsmetadata, geen kopieën van de lokale bestanden. Dit zelfstandige scherm genereert geen AI-resultaten en publiceert niets in Notion; daarvoor blijft de Python-app beschikbaar.
+
 De werkruimte heeft een donkere vormgeving met mintgroene accenten en een lokaal opgeslagen architectuurvisual. Het beeld in `assets/architecture-hero.png` is speciaal voor deze app gegenereerd: een illustratief model met vijf zwevende lagen, geen weergave van een vastgesteld ontwerp. De visual en stijlen worden zonder externe beeldservers geladen. De bronselectie, invoer en review blijven bedienbaar op desktop en telefoon. De groene knop in het beeld navigeert naar de bronselectie.
 
 ## Projectstartarchitectuur: project en bronnen kiezen
