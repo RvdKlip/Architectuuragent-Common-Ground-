@@ -21,7 +21,7 @@ def render_hero():
     <div class="eyebrow"><span class="live-dot"></span> COMMON GROUND · ARCHITECTUURAGENT</div>
     <h2>Een sterk begin.<br><span>Een helder ontwerp.</span></h2>
     <p>Van projectambitie naar een onderbouwde architectuur.<br>Kies je bronnen. Leg je fundament.</p>
-    <a class="hero-action" href="#bronnen" target="_self">Kies je bronnen <span aria-hidden="true">↗</span></a>
+    <a class="hero-action" href="#generate-psa" target="_self">Genereer PSA <span aria-hidden="true">↗</span></a>
   </div>
   <div class="hero-footer"><span><span class="live-dot"></span> Vijf lagen. Eén samenhangend fundament.</span><span class="concept-label">CONCEPTVISUAL</span></div>
 </section>

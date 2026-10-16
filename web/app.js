@@ -149,17 +149,18 @@ function render() {
   message.textContent=missing.length?'Nog inhoud nodig voor: '+missing.map(c=>categories[c]).join('; '):!docs.length?'Selecteer een bron en voeg de inhoud toe.':oversized?'De hoofdstukselectie is groter dan 155.000 tekens. Kies minder hoofdstukken voor AI-generatie.':'Je bronselectie is samengesteld. Bewaar je selectie om hiermee verder te werken.';
   $('enterprise-status').textContent=remote.text?(isEnabled('enterprise')?'Geselecteerd':'Niet geselecteerd')+' · '+remote.selected.size+' hoofdstukken · '+selectedText().length.toLocaleString('nl-NL')+' tekens':files.enterprise.some(f=>f.selected)?'Eigen versie toegevoegd':'Openbare bron nog niet opgehaald';
   renderBuildingBlocks();
+  if(typeof PSA!=='undefined')PSA.checkFreshness();
 }
 
 document.querySelectorAll('.source-toggle').forEach(check=>check.addEventListener('change',render));
 document.querySelectorAll('input[type=file]').forEach(input=>input.addEventListener('change',()=>{
   const category=input.dataset.category;
-  files[category]=[...input.files].map(file=>({file,selected:true,reading:category!=='enterprise',contexts:[],warnings:[],error:null}));
+  files[category]=[...input.files].map(file=>({file,selected:true,reading:true,contexts:[],warnings:[],error:null}));
   render();
-  if (category!=='enterprise') for (const entry of files[category]) {
+  for (const entry of files[category]) {
     (async()=>{
       try {
-        const result=await DocumentReader.read(entry.file); entry.contexts=result.contexts; entry.warnings=result.warnings;
+        const result=await DocumentReader.read(entry.file); entry.contexts=result.contexts; entry.warnings=result.warnings;entry.pages=result.pages||1;
       } catch (error) { entry.error=error.message || 'Dit bestand kon niet worden gelezen.'; }
       finally { entry.reading=false; render(); }
     })();
@@ -198,8 +199,8 @@ $('download-selection').addEventListener('click',()=>{
   const docs=selectedDocuments(); const selected=[...document.querySelectorAll('.source-toggle:checked')].map(c=>c.dataset.category);
   const manifest={project:$('project-name').value,goals:$('project-goals').value,type:$('project-type').value,created_at:new Date().toISOString(),
     sources:docs.map((d,i)=>({code:'B'+String(i).padStart(2,'0'),...d})),missing:selected.filter(c=>!docs.some(d=>d.category===c)).map(c=>categories[c]),
-    building_blocks:buildingBlocks,horizon:{url:'https://rotterdam.horizzon.cloud/sites/8579a6d6-9680-4fee-959c-4793130eef6f/views/e059f7c1-e164-f111-bb43-025a1dd2f359',content_loaded:isEnabled('horizon')&&files.horizon.some(f=>f.selected&&!f.error&&!f.reading)},note:'Bronselectie en bouwblokkenadvies, geen gegenereerde projectstartarchitectuur. Lokale bestanden zijn niet opgenomen; adviesonderbouwing kan korte tekstfragmenten uit die bestanden bevatten.'};
+    building_blocks:buildingBlocks,output:{brand:document.querySelector('input[name=brand]:checked').value,destinations:[...document.querySelectorAll('input[name=destination]:checked')].map(input=>input.value)},horizon:{url:'https://rotterdam.horizzon.cloud/sites/8579a6d6-9680-4fee-959c-4793130eef6f/views/e059f7c1-e164-f111-bb43-025a1dd2f359',content_loaded:isEnabled('horizon')&&files.horizon.some(f=>f.selected&&!f.error&&!f.reading)},note:'Bronselectie en bouwblokkenadvies, geen gegenereerde projectstartarchitectuur. Lokale bestanden zijn niet opgenomen; adviesonderbouwing kan korte tekstfragmenten uit die bestanden bevatten.'};
   const url=URL.createObjectURL(new Blob([JSON.stringify(manifest,null,2)],{type:'application/json'}));
   const anchor=document.createElement('a'); anchor.href=url; anchor.download='bronselectie.json'; anchor.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
 });
-render();
+// Eerste render volgt na het initialiseren van de PSA-module.

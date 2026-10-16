@@ -125,13 +125,13 @@ def test_psa_screen_generates_from_selected_chapters(snapshot, plan, tmp_path):
         generate.assert_not_called()
         at.text_input(key='project_name').set_value('Nieuw dienstverleningsproject')
         at.text_area(key='project_goals').set_value('Maak dienstverlening toegankelijker.').run()
-        button = next(b for b in at.button if b.label == 'Maak concept-projectstartarchitectuur')
+        button = next(b for b in at.button if b.label == 'Genereer PSA')
         assert not button.disabled
         # Een geselecteerd kader zonder inhoud blokkeert generatie.
         at.checkbox(key='use_policy').check().run()
-        assert next(b for b in at.button if b.label == 'Maak concept-projectstartarchitectuur').disabled
+        assert next(b for b in at.button if b.label == 'Genereer PSA').disabled
         at.checkbox(key='use_policy').uncheck().run()
-        next(b for b in at.button if b.label == 'Maak concept-projectstartarchitectuur').click().run()
+        next(b for b in at.button if b.label == 'Genereer PSA').click().run()
         assert not at.exception
         assert generate.call_count == 1
         assert generate.call_args.kwargs == {'project_start': True}
@@ -149,4 +149,4 @@ def test_enterprise_deselection_excludes_source(snapshot, tmp_path):
         assert not at.exception
         assert at.metric[0].value == '0'
         assert not at.dataframe
-        assert next(b for b in at.button if b.label == 'Maak concept-projectstartarchitectuur').disabled
+        assert next(b for b in at.button if b.label == 'Genereer PSA').disabled

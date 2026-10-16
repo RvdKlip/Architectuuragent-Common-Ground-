@@ -1,12 +1,38 @@
 # Common Ground Architectuuragent
 
+## PSA genereren, huisstijl en publicatie
+
+De primaire groene knop is **Genereer PSA**. De app gebruikt Rotterdam-groen **`#00811F`** voor primaire acties. In het losse `index.html` opent de knop een venster met **In welke huisstijl? → Rotterdam / Common Ground** en meervoudige keuzes **PDF-formaat**, **Confluence** en **Notion**. In de Python-app staan dezelfde keuzes boven de generatieknop.
+
+Standaard genereert het losse HTML-bestand lokaal een **eerste brongebaseerde concept-PSA**: projectafbakening, expliciete bronfragmenten met broncodes, geadviseerde ABB/SBB’s per laag, een concept-ADR en open besluiten. Dit is geen semantische AI-synthese en geen vastgesteld ontwerp. Er wordt niets verzonnen om ontbrekende broninformatie op te vullen. Geselecteerde maar ontbrekende of onleesbare bronnen blokkeren generatie; bronnen die nog worden gelezen moeten eerst gereed zijn. Een gewijzigde bronset maakt het oude concept zichtbaar verouderd en blokkeert verdere publicatie totdat opnieuw is gegenereerd.
+
+In hetzelfde venster kun je **AI-synthese gebruiken (optioneel)** openen en de lokale service instellen. Zet hiervoor `OPENAI_API_KEY` veilig op de service; `OPENAI_MODEL` is optioneel. De expliciete AI-keuze en de bevestiging dat de bronnen gedeeld mogen worden zijn vereist. Pas na een klik op genereren gaan de geselecteerde bronteksten via de lokale `/generate`-route naar de bestaande OpenAI-workflow. De API-sleutel komt niet in het HTML-bestand of de generatieaanvraag terecht. Deze route handhaaft de bronlimiet van 155.000 tekens. Een ontbrekende AI-koppeling geeft een foutmelding, geen stilzwijgende terugval naar een zogenaamd AI-resultaat.
+
+Je kunt het concept bekijken, de opgemaakte HTML downloaden en bij de keuze PDF een **echt PDF-bestand** downloaden. jsPDF 4.2.1 en de MIT-licentie zijn ingebed; de oorspronkelijke pakketdownload is tegen de officiële SHA-512 gecontroleerd. De Python-app gebruikt de bestaande AI-workflow voor synthese en PyMuPDF voor PDF-uitvoer. Bij deze wijziging zijn geen betaalde API-aanroepen uitgevoerd.
+
+De huisstijlkeuze bepaalt kleuren, koppen, typografie en documentstructuur. **Rotterdam** gebruikt `#00811F`, **Common Ground** gebruikt `#0D4F67`. De profielen staan in `assets/housestyles.json`. Er zijn geen officiële logo’s of gelicenseerde huisstijlfonts meegeleverd; dit zijn vormgevingsprofielen, geen bevestiging van formele huisstijlgoedkeuring. Notion ondersteunt geen willekeurige hexkleuren of fonts: daar worden het huisstijllabel, de koppenstructuur en de beschikbare groene/blauwe kopkleuren toegepast. Confluence krijgt de huisstijlvermelding en een paneel in de profielkleuren; de ruimtebrede vormgeving blijft door Confluence bepaald.
+
+Een vinkje bij Confluence of Notion is een **publicatiekeuze**, geen publicatiebevestiging. Bekijk en beoordeel eerst de PSA. Alleen via **Publiceer beoordeelde PSA** worden de gekozen bestemmingen aangeroepen. Het scherm toont per bestemming of een pagina daadwerkelijk is bevestigd, of waarom nog niet is gepubliceerd. Beide koppelingen worden lokaal met mocks getest; echte publicatie is hier nog niet uitgevoerd omdat credentials en doelpagina’s ontbreken.
+
+### Publiceren vanuit het losse index-bestand
+
+Het deelbare HTML-bestand bevat geen platformtokens. Voor AI-synthese en/of live publicatie kan een lokale Python-service worden gebruikt:
+
+1. Stel `PSA_SERVICE_TOKEN` veilig in als een eigen ASCII-sleutel van minimaal 24 tekens. Neem deze sleutel niet op in Git, een gedeeld HTML-bestand of chat.
+2. Stel voor Notion `NOTION_TOKEN` en `NOTION_PARENT_PAGE_ID` in; geef de integratie toegang tot die pagina.
+3. Stel voor Confluence Cloud `CONFLUENCE_BASE_URL` (bijvoorbeeld `https://organisatie.atlassian.net`), `CONFLUENCE_EMAIL`, `CONFLUENCE_TOKEN` en `CONFLUENCE_SPACE_ID` in. `CONFLUENCE_PARENT_ID` is optioneel. De service ondersteunt de Confluence Cloud-API, niet willekeurige on-premise-URL’s.
+4. Start vanuit de projectmap: `.venv/bin/python publication_service.py`. De service luistert uitsluitend op `127.0.0.1:8765` en logt geen tokens of documentinhoud.
+5. Vul bij het resultaat in de browser onder **Publicatiekoppeling instellen** de lokale URL `http://127.0.0.1:8765` en de service-sleutel in. Bevestig de review en klik op publiceren. De service heeft leesbare platformcredentials nodig; plaats geen sleutels in de HTML. De browser kan om toestemming voor lokaal netwerkverkeer vragen.
+
+De service controleert toegang, broncodes en reviewbevestiging. Binnen dezelfde servicerun worden reeds bevestigde publicaties van hetzelfde concept, dezelfde huisstijl en bestemming hergebruikt. Na een time-out of serverherstart moet je de doelpagina controleren voordat je opnieuw publiceert: er zijn geen automatische retries van schrijfverzoeken. Alleen de beoordeelde PSA en bronverwijzingen gaan naar de platforms, niet de originele bestanden. De Python-webapp kan dezelfde platforms rechtstreeks gebruiken via de instellingen in de zijbalk.
+
 ## Direct openen zonder installatie
 
 Download `index.html` en open dit bestand met een dubbelklik in je browser. Het donkere app-scherm en de architectuurafbeelding zitten samen in dit ene bestand; hiervoor is geen Python, Streamlit of webserver nodig.
 
-Je kunt projectgegevens invullen, bronnen selecteren, lokale documenten kiezen, de openbare enterprise architectuur ophalen en hoofdstukken selecteren, en de bronselectie inclusief bouwblokkenadvies als JSON downloaden. Voor het ophalen van de openbare bron is internet nodig; een eigen versie uploaden werkt ook zonder internet. Geselecteerde PDF-, DOCX-, TXT- en Markdown-documenten worden lokaal gelezen voor het bouwblokkenadvies. Er worden geen documentbestanden naar externe diensten verstuurd. Het JSON-bestand bevat de bronkeuze, bestandsmetadata en korte bewijsfragmenten bij het advies, geen volledige kopieën van de lokale bestanden. Dit zelfstandige scherm genereert geen volledige PSA met AI en publiceert niets in Notion; daarvoor blijft de Python-app beschikbaar.
+Je kunt projectgegevens invullen, bronnen selecteren, lokale documenten kiezen, de openbare enterprise architectuur ophalen en hoofdstukken selecteren, en de bronselectie inclusief bouwblokkenadvies als JSON downloaden. Daarnaast kun je een eerste concept-PSA genereren en in de gekozen huisstijl als PDF of HTML bewaren. Voor het ophalen van de openbare bron is internet nodig; een eigen versie uploaden werkt ook zonder internet. Geselecteerde PDF-, DOCX-, TXT- en Markdown-documenten worden lokaal gelezen voor advies en bronfragmenten. Het JSON-bestand bevat de bronkeuze, bestandsmetadata en korte bewijsfragmenten bij het advies, geen volledige kopieën van de lokale bestanden. Zonder gekoppelde service gebruikt het losse bestand geen semantische AI-synthese; de optionele AI-keuze gebruikt de bestaande workflow via de lokale service. Publicatie naar Notion of Confluence is alleen mogelijk na review via de ingestelde lokale publicatieservice; zonder koppeling meldt het scherm expliciet dat nog niet is gepubliceerd.
 
-De werkruimte heeft een donkere vormgeving met mintgroene accenten en een lokaal opgeslagen architectuurvisual. Het beeld in `assets/architecture-hero.png` is speciaal voor deze app gegenereerd: een illustratief model met vijf zwevende lagen, geen weergave van een vastgesteld ontwerp. De visual en stijlen worden zonder externe beeldservers geladen. De bronselectie, invoer en review blijven bedienbaar op desktop en telefoon. De groene knop in het beeld navigeert naar de bronselectie.
+De werkruimte heeft een donkere vormgeving met Rotterdam-groene primaire acties en een lokaal opgeslagen architectuurvisual. Het beeld in `assets/architecture-hero.png` is speciaal voor deze app gegenereerd: een illustratief model met vijf zwevende lagen, geen weergave van een vastgesteld ontwerp. De visual en stijlen worden zonder externe beeldservers geladen. De bronselectie, invoer en review blijven bedienbaar op desktop en telefoon. De groene knop in het beeld opent de PSA-generatiekeuzes.
 
 ## Projectstartarchitectuur: project en bronnen kiezen
 
@@ -48,7 +74,7 @@ De broncatalogus bijwerken vanuit een bestaande bronmomentopname kan met `python
 
 Getest: Python-tests, JavaScript/Python-pariteit en browserproeven met onderwerpwijzigingen, handmatige keuzes, TXT/Markdown-, PDF- en DOCX-inhoud, scans, uitvinken en de JSON-download. API-generatie en Notion-publicatie zijn bij deze wijziging niet uitgevoerd. Node.js is alleen nodig voor de optionele pariteitscontrole, niet om de app of het index-bestand te gebruiken.
 
-Onderaan staat de daadwerkelijke bronset met broncodes. Een geselecteerd kader zonder inhoud blokkeert generatie. **Download bronselectie** legt de keuze vast als JSON. **Maak concept-projectstartarchitectuur** gebruikt uitsluitend de gekozen bronnen, controleert lokaal de tekstlimiet en doet pas daarna een AI-aanroep. Bij een te grote bronset wordt niets stilzwijgend afgekapt. Het beoordeelbare concept is als JSON te downloaden; er wordt geen Word-document gemaakt of Notion-publicatie uitgevoerd door deze knop.
+Onderaan staat de daadwerkelijke bronset met broncodes. Een geselecteerd kader zonder inhoud blokkeert generatie. **Download bronselectie** legt de keuze vast als JSON. **Genereer PSA** gebruikt uitsluitend de gekozen bronnen, controleert lokaal de tekstlimiet en doet pas daarna een AI-aanroep. Bij een te grote bronset wordt niets stilzwijgend afgekapt. Het beoordeelbare concept is als JSON te downloaden; er wordt geen Word-document gemaakt of Notion-publicatie uitgevoerd door deze knop.
 
 Een eerste bronmomentopname voorbereiden (leest een bestaande cache of haalt de openbare bron op):
 
@@ -67,7 +93,7 @@ Eenmalig instellen:
 1. Maak in Notion een interne integratie via **Settings → Connections → Develop or manage integrations** (of https://www.notion.so/profile/integrations). Geef deze leesrechten en het recht om inhoud toe te voegen (*Read content* en *Insert content*).
 2. Open de pagina waaronder de resultaten moeten komen en geef de integratie toegang via **… → Connections**. De naam van deze optie kan per Notion-versie verschillen.
 3. Start de app. Vul in de zijbalk de **Notion-integratiesleutel** en de link van de **bovenliggende Notion-pagina** in. Je kunt deze ook veilig instellen als `NOTION_TOKEN` en `NOTION_PARENT_PAGE_ID`. Zet echte sleutels nooit in Git of in chat. `.env` wordt niet automatisch geladen.
-4. Analyseer de bronnen, of laad een bestaande `concept_review.json` met de oorspronkelijke bronbestanden in dezelfde volgorde. Alleen bij nieuwe AI-analyse is het bestaande Word-document verplicht. Bij hergebruik moet de oorspronkelijke bronnummering behouden blijven: was het Word-document B00, upload het dan ook bij hergebruik.
+4. Analyseer de bronnen, of laad een bestaande `concept_review.json` met de oorspronkelijke bronbestanden in dezelfde volgorde. Een bestaand Word-document is alleen verplicht bij de workflow Bestaande architectuur bijwerken. Bij hergebruik moet de oorspronkelijke bronnummering behouden blijven: was het Word-document B00, upload het dan ook bij hergebruik.
 5. Controleer de JSON, vink de review/publicatiebevestiging aan en klik **Publiceer concept in Notion**. De app toont de link zodra Notion de publicatie bevestigt.
 
 Er is geen Word-export nodig voor deze publicatiestap en geen OpenAI-aanroep bij het laden van een bestaand concept. Alleen de gereviewde resultaattekst en bronverwijzingen gaan naar Notion, inclusief de daarin voorkomende bestandsnamen. Volledige bronbestanden worden niet meegestuurd.

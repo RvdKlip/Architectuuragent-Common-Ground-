@@ -134,6 +134,7 @@ def test_web_review_then_publish_without_word(plan, sources, tmp_path):
     at.session_state['agent_sources'] = sources
     at.session_state['agent_root'] = str(tmp_path)
     at.session_state['agent_base'] = None
+    at.session_state['output_notion'] = True
     at.run(timeout=30)
     assert not at.exception
     for field in at.text_input:
@@ -148,6 +149,7 @@ def test_web_review_then_publish_without_word(plan, sources, tmp_path):
         assert not at.exception
         assert send.call_count == 1
         assert send.call_args.args == (plan, sources, PARENT, 'test-token')
+        assert send.call_args.kwargs == {'brand':'Rotterdam'}
     assert any('gepubliceerd' in s.value for s in at.success)
     assert not list(tmp_path.iterdir())
     at.run()

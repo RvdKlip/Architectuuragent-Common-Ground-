@@ -128,13 +128,21 @@ def _request(method: str, path: str, token: str, payload: dict) -> dict:
         raise NotionPublishError('Geen bevestiging van Notion ontvangen. Controleer de doelpagina voordat je opnieuw publiceert; de pagina kan al zijn aangemaakt.') from None
 
 
-def publish_plan(plan: dict, sources: list, parent: str, token: str) -> dict:
+def publish_plan(plan: dict, sources: list, parent: str, token: str, *, brand: str | None = None) -> dict:
     """Maak een nieuwe subpagina. Alleen aanroepen na expliciete publicatieactie."""
     parent = page_id(parent)
     token = token.strip()
     if not token or '\n' in token or '\r' in token:
         raise ValueError('Vul een geldige Notion-integratiesleutel in.')
     blocks = blocks_for_plan(plan, sources)
+    if brand is not None:
+        from .output import house_style
+        style = house_style(brand)
+        blocks.insert(0, {'object': 'block', 'type': 'paragraph', 'paragraph': {
+            'rich_text': rich_text('Huisstijl: '+brand+' · CONCEPT'), 'color': style['notion_color']}})
+        for block in blocks:
+            if block['type'].startswith('heading_'):
+                block[block['type']]['color'] = style['notion_color']
     title = plan['title'] + ' — CONCEPT'
     if len(title) > 2000:
         raise ValueError('De paginatitel is te lang voor Notion (maximaal 2.000 tekens).')

@@ -41,7 +41,7 @@ const DocumentReader = (() => {
         page.cleanup();
       }
       assertText(contexts.map(context => context.text).join('\n'));
-      return {contexts, warnings};
+      return {contexts, warnings, pages:pdf.numPages};
     } finally {
       await task.destroy();
     }
