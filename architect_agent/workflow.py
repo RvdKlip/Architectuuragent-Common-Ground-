@@ -9,7 +9,7 @@ from .diagram import render_layers, render_flow
 from .word import make_document
 
 
-def prepare(base_doc:Path, sources:list[Path], scope:str, goals:str, model:str|None=None, approved_json:Path|None=None):
+def prepare(base_doc:Path|None, sources:list[Path], scope:str, goals:str, model:str|None=None, approved_json:Path|None=None, *, project_start:bool=False):
     parsed=collect(sources,base_doc=base_doc)
     if approved_json:
         plan=json.loads(Path(approved_json).read_text(encoding='utf-8'))
@@ -18,7 +18,10 @@ def prepare(base_doc:Path, sources:list[Path], scope:str, goals:str, model:str|N
         if errors:
             raise ValueError('Concept-JSON bevat fouten: '+'; '.join(errors))
     else:
-        plan=generate_plan(parsed,scope,goals,model)
+        if project_start:
+            plan=generate_plan(parsed,scope,goals,model,project_start=True)
+        else:
+            plan=generate_plan(parsed,scope,goals,model)
     return parsed,plan
 
 

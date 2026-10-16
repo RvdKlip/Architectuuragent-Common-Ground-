@@ -142,7 +142,7 @@ def test_web_review_then_publish_without_word(plan, sources, tmp_path):
     at.run()
     publish = next(b for b in at.button if b.label == '2 · Publiceer concept in Notion')
     assert publish.disabled
-    at.checkbox[0].check().run()
+    next(c for c in at.checkbox if c.label.startswith('Ik heb dit concept gereviewd')).check().run()
     with patch('architect_agent.notion.publish_plan', return_value=PAGE) as send:
         next(b for b in at.button if b.label == '2 · Publiceer concept in Notion').click().run()
         assert not at.exception
@@ -154,6 +154,6 @@ def test_web_review_then_publish_without_word(plan, sources, tmp_path):
     assert next(b for b in at.button if b.label == '2 · Publiceer concept in Notion').disabled
     # Een aangepast concept vereist een nieuwe review.
     changed = dict(plan, scope='Nieuwe scope')
-    at.text_area[0].set_value(json.dumps(changed)).run()
-    assert not at.checkbox[0].value
+    at.text_area(key='review_json').set_value(json.dumps(changed)).run()
+    assert not next(c for c in at.checkbox if c.label.startswith('Ik heb dit concept gereviewd')).value
     assert next(b for b in at.button if b.label == '2 · Publiceer concept in Notion').disabled

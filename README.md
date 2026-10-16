@@ -1,5 +1,25 @@
 # Common Ground Architectuuragent
 
+## Projectstartarchitectuur: project en bronnen kiezen
+
+Het beginscherm laat een architect een **nieuwe projectstartarchitectuur (PSA)** samenstellen. Vul de projectnaam en het doel/de afbakening in en selecteer welke bronnen moeten worden meegenomen. Voor een nieuwe PSA is geen bestaand Word-document nodig. De bestaande workflow blijft beschikbaar via **Type architectuur → Bestaande architectuur bijwerken**.
+
+De vaste bronoptie **Enterprise architectuur Platform Dienstverlening** verwijst naar de door de gebruiker opgegeven [GitBook](https://dienstverleningsplatform.gitbook.io/platform-generieke-dienstverlening-public/enterprisearchitectuur) en leest de [Markdown-bron op GitHub](https://github.com/ivorstenbosch-maker/EnterpriseArchitectuurCG/blob/main/Enterprisearchitectuur-GPT.md). De volledige tekst is circa 388.000 tekens, groter dan de huidige bronlimiet van 155.000 tekens. Daarom kiest de architect expliciet welke hoofdstukken mee moeten. Standaard zijn dit **Managementsamenvatting** en **Visie, principes, scope**. Andere hoofdstukken worden niet automatisch meegenomen of samengevat.
+
+Met **Bron vernieuwen** haalt de app de actuele openbare tekst op. Een lokale momentopname wordt bewaard in de genegeerde map `.source-cache/`. De app toont ophaaldatum en bronkenmerk; het geselecteerde brondocument bevat de URL, de SHA-256 van de volledige tekst en de gekozen hoofdstukken. De momentopname is geen vastgezette officiële versie. Voor een eigen of historische versie kun je ook een PDF, DOCX, TXT of Markdown uploaden. De opgehaalde volledige bron wordt niet in deze Git-repository gepubliceerd.
+
+Andere broncategorieën zijn **Common Ground-kaders en principes**, **bestaande ADR’s** en **privacy- en beveiligingskaders**. Dit zijn uploadmogelijkheden, geen vooraf ingevulde of gevalideerde documenten. Daarnaast kun je projectopdrachten, requirements en andere projectdocumenten toevoegen en per bestand aan- of uitvinken.
+
+Onderaan staat de daadwerkelijke bronset met broncodes. Een geselecteerd kader zonder inhoud blokkeert generatie. **Download bronselectie** legt de keuze vast als JSON. **Maak concept-projectstartarchitectuur** gebruikt uitsluitend de gekozen bronnen, controleert lokaal de tekstlimiet en doet pas daarna een AI-aanroep. Bij een te grote bronset wordt niets stilzwijgend afgekapt. Het beoordeelbare concept is als JSON te downloaden; er wordt geen Word-document gemaakt of Notion-publicatie uitgevoerd door deze knop.
+
+Een eerste bronmomentopname voorbereiden (leest een bestaande cache of haalt de openbare bron op):
+
+```bash
+.venv/bin/python -m architect_agent.catalogue
+```
+
+Netwerktoegang tot `raw.githubusercontent.com` is hiervoor nodig. Zonder netwerk blijft een geldige lokale momentopname bruikbaar; anders kun je een eigen versie uploaden. Tests gebruiken synthetische bronnen en gemockte API-aanroepen. De echte enterprise-architectuurbron is opgehaald en de standaard hoofdstukselectie is lokaal op extractie en omvang gecontroleerd. Er zijn geen betaalde AI-aanroepen of Notion-publicaties uitgevoerd voor deze wijziging.
+
 ## Publiceren in Notion
 
 Na review kun je het resultaat rechtstreeks als **nieuwe Notion-subpagina** publiceren. Word-export is optioneel. De pagina bevat bewerkbare koppen, samenvatting, wijzigingen met bronverwijzingen, vijf architectuurlagen, gegevensstroom, concept-ADR, architectuurregels, open besluiten, aannames en bronoverzicht. De inhoud blijft CONCEPT; publicatie maakt een voorstel niet tot vastgesteld besluit.

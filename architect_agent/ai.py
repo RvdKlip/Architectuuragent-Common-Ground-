@@ -29,20 +29,31 @@ REGELS:
 """
 
 
-def generate_plan(sources: list[Source], scope: str, goals: str, model: str | None = None) -> dict:
+def generate_plan(sources: list[Source], scope: str, goals: str, model: str | None = None, *, project_start: bool = False) -> dict:
     from openai import OpenAI
     if not os.environ.get('OPENAI_API_KEY'):
         raise RuntimeError('OPENAI_API_KEY ontbreekt. Stel deze lokaal in voordat je AI-generatie gebruikt.')
     model = model or os.environ.get('OPENAI_MODEL', 'gpt-4.1')
+    purpose = (
+        'Maak een NIEUWE projectstartarchitectuur (PSA) voor dit project op basis van uitsluitend '
+        'de geselecteerde bronnen. Gebruik changes voor voorgestelde architectuurkeuzes, hun '
+        'onderbouwing en bronverwijzingen. De enterprise architectuur is een kader als deze is '
+        'aangeleverd; verzin geen inhoud van ontbrekende kaders. Benoem ontbrekende informatie '
+        'bij open_decisions. Er is geen bestaand Word-document vereist.\n\n'
+        if project_start else
+        'Maak een concept dat het BESTAANDE Word-document respecteert en de nieuwe '
+        'broninhoud als voortschrijdend inzicht bespreekt.\n\n'
+    )
     prompt = (
         f"GEWENST ONDERWERP: {scope}\nSPECIFIEKE OPDRACHT: {goals}\n\n"
-        "Maak een concept dat het BESTAANDE Word-document respecteert en de nieuwe "
-        "broninhoud als voortschrijdend inzicht bespreekt.\n\n" + source_context(sources)
+        + purpose + source_context(sources)
     )
     client = OpenAI()
     response = client.responses.create(
         model=model,
-        instructions=INSTRUCTIONS,
+        instructions=INSTRUCTIONS.replace('een concept-update voor een bestaand solutionarchitectuurdocument.',
+            'een nieuwe concept-projectstartarchitectuur (PSA).' if project_start else
+            'een concept-update voor een bestaand solutionarchitectuurdocument.'),
         input=prompt,
         text={"format":{"type":"json_schema","name":"architectuur_update","strict":True,"schema":UPDATE_SCHEMA}},
         max_output_tokens=9500,

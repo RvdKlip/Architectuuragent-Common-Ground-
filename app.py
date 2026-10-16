@@ -12,45 +12,47 @@ from architect_agent.workflow import prepare,build
 from architect_agent.schemas import validate
 from architect_agent.notion import publish_plan, NotionPublishError
 from architect_agent.sources import collect
+from architect_agent.selection import write_documents
+from architect_agent.selection_ui import render_selection
 
-st.set_page_config(page_title='Common Ground Architectuuragent',page_icon='🏛️',layout='wide')
-st.title('Common Ground · Architectuuragent')
-st.caption('Van bronstukken naar concept-solutionarchitectuur, vijf-lagenplaat en ADR – met bronverwijzingen en verplichte review.')
+st.set_page_config(page_title='Projectstartarchitectuur · Common Ground',page_icon='🏛️',layout='wide')
 
 with st.sidebar:
-    st.header('Instellingen')
+    st.markdown('### Common Ground')
+    st.caption('Architectuuragent · werkruimte voor de architect')
+    st.divider()
+    st.markdown('**Projectstartarchitectuur**')
+    st.caption('Project → bronselectie → concept → review')
+    st.divider()
+    st.header('Modelinstellingen')
     model=st.text_input('OpenAI-model',os.getenv('OPENAI_MODEL','gpt-4.1'))
     api_key=st.text_input('OPENAI_API_KEY (optioneel)',type='password',help='Of stel de sleutel in als omgevingsvariabele. Wordt niet in outputbestanden bewaard.')
     st.info('Een API-aanroep is optioneel bij hergebruik van beoordeelde JSON. API-gebruik kan kosten veroorzaken.')
     st.warning('Gebruik alleen bronstukken die volgens het gemeentelijke informatiebeveiligingsbeleid naar de gekozen AI-dienst mogen. Bronbestanden worden bij genereren aan de API doorgegeven.')
-    st.header('Publiceren in Notion')
-    notion_token=st.text_input('Notion-integratiesleutel',type='password',value=os.getenv('NOTION_TOKEN',''),help='Geef de integratie toegang tot de bovenliggende pagina. Bewaar deze sleutel niet in Git.')
-    notion_parent=st.text_input('Bovenliggende Notion-pagina (link of ID)',value=os.getenv('NOTION_PARENT_PAGE_ID',''))
-    st.caption('Elke publicatie maakt een nieuwe subpagina. Alleen het gereviewde resultaat en bronverwijzingen worden verstuurd; bronbestanden blijven lokaal.')
+    with st.expander('Notion · later instellen'):
+        notion_token=st.text_input('Notion-integratiesleutel',type='password',value=os.getenv('NOTION_TOKEN',''),help='Geef de integratie toegang tot de bovenliggende pagina. Bewaar deze sleutel niet in Git.')
+        notion_parent=st.text_input('Bovenliggende Notion-pagina (link of ID)',value=os.getenv('NOTION_PARENT_PAGE_ID',''))
+        st.caption('Publiceren gebeurt uitsluitend via een expliciete publicatieactie na review.')
 
-st.subheader('1. Bronnen en opdracht')
-base=st.file_uploader('Bestaande solutionarchitectuur (Word; nodig bij nieuwe AI-analyse)',type=['docx'],key='base')
-uploads=st.file_uploader('Nieuwe onderbouwingen / Notion-export / ADR-overzicht (één of meer bestanden)',type=['pdf','docx','txt','md'],accept_multiple_files=True,key='sources')
-col1,col2=st.columns([1,2])
-with col1:
-    scope=st.text_input('Onderwerp / epic','Signaalmanagement')
-with col2:
-    goals=st.text_input('Gewenste wijziging','Verwerk voortschrijdend inzicht, maak nieuwe architectuurplaat, concept-ADR en decision rules; respecteer bestaande ADR’s.')
-style=st.file_uploader('Optioneel: visueel stijlvoorbeeld (alleen referentie op het scherm)',type=['png','jpg','jpeg'])
-if style:
-    st.image(style,caption='De gegenereerde diagrammen volgen het vaste Common Ground-vijflagensjabloon; dit voorbeeld wordt niet automatisch geïnterpreteerd.')
+selection=render_selection()
+base=selection['base']
+documents=selection['documents']
+scope=selection['scope']
+goals=selection['goals']
+selection_ready=bool(documents) and not selection['missing']
+budget_ok=(not selection['manifest']['enterprise_architecture']
+           or len(documents[0].content.decode('utf-8'))<=155000)
+st.subheader('3. Maak een concept ter review')
+st.caption('De bronselectie wordt eerst lokaal gecontroleerd. Alleen als je op de analyseknop klikt, worden de geselecteerde bronteksten naar het ingestelde AI-model verstuurd.')
 
 review_upload=st.file_uploader('Optioneel: bestaand concept_review.json laden zonder AI-aanroep',type=['json'])
-if st.button('Laad bestaand concept',disabled=not (review_upload and uploads)):
+if st.button('Laad bestaand concept',disabled=not (review_upload and selection_ready and budget_ok)):
     try:
         root=Path(tempfile.mkdtemp(prefix='cg_architectuur_'))
         b=None
         if base:
             b=root/'basis.docx';b.write_bytes(base.getvalue())
-        paths=[]
-        for idx,upload in enumerate(uploads):
-            path=root/f'bron_{idx+1:02d}_{Path(upload.name).name}'
-            path.write_bytes(upload.getvalue());paths.append(path)
+        paths=write_documents(documents,root)
         parsed=collect(paths,base_doc=b)
         plan=json.loads(review_upload.getvalue())
         errors=validate(plan,parsed)
@@ -58,29 +60,32 @@ if st.button('Laad bestaand concept',disabled=not (review_upload and uploads)):
         st.session_state.update(agent_root=str(root),agent_base=str(b) if b else None,
                                 agent_sources=parsed,agent_plan_json=json.dumps(plan,ensure_ascii=False,indent=2))
         st.session_state['review_json']=st.session_state['agent_plan_json']
+        st.session_state['agent_selection']=selection['manifest']
         for k in ('result_zip','result_docx','result_png','result_manifest'):
             st.session_state.pop(k,None)
         st.success('Concept geladen zonder AI-aanroep. Controleer de inhoud en de bronvolgorde vóór publicatie.')
     except Exception as e:
         st.error(f'Laden gestopt: {e}')
 
-if st.button('1 · Analyseer bronnen en maak concept',type='primary',disabled=not (base and uploads)):
+can_generate=selection_ready and budget_ok and bool(scope.strip()) and bool(goals.strip()) and (selection['project_start'] or base is not None)
+if not scope.strip() or not goals.strip():
+    st.info('Vul een projectnaam en doel/afbakening in om een concept te maken.')
+if st.button('Maak concept-projectstartarchitectuur' if selection['project_start'] else 'Analyseer bronnen en maak concept-update',type='primary',disabled=not can_generate):
     try:
         if api_key: os.environ['OPENAI_API_KEY']=api_key
         root=Path(tempfile.mkdtemp(prefix='cg_architectuur_'))
-        b=root/'basis.docx';b.write_bytes(base.getvalue())
-        source_paths=[]
-        for idx,upload in enumerate(uploads):
-            target=root/f'bron_{idx+1:02d}_{Path(upload.name).name}'
-            target.write_bytes(upload.getvalue())
-            source_paths.append(target)
+        b=None
+        if base:
+            b=root/'basis.docx';b.write_bytes(base.getvalue())
+        source_paths=write_documents(documents,root)
         with st.spinner('Bronstukken analyseren en concept opstellen...'):
-            parsed,plan=prepare(b,source_paths,scope,goals,model)
+            parsed,plan=prepare(b,source_paths,scope,goals,model,project_start=selection['project_start'])
         st.session_state['agent_root']=str(root)
-        st.session_state['agent_base']=str(b)
+        st.session_state['agent_base']=str(b) if b else None
         st.session_state['agent_sources']=parsed
         st.session_state['agent_plan_json']=json.dumps(plan,ensure_ascii=False,indent=2)
         st.session_state['review_json']=st.session_state['agent_plan_json']
+        st.session_state['agent_selection']=selection['manifest']
         for k in ('result_zip','result_docx','result_png','result_manifest'):
             st.session_state.pop(k,None)
         st.success('Concept gereed. Controleer en bewerk de JSON hieronder vóór publicatie.')
@@ -91,9 +96,12 @@ if st.button('1 · Analyseer bronnen en maak concept',type='primary',disabled=no
         st.error(f'Analyse gestopt: {e}')
 
 if 'agent_plan_json' in st.session_state:
-    st.subheader('2. Review de voorgestelde architectuur')
+    st.subheader('Concept beoordelen')
+    if st.session_state.get('agent_selection') and st.session_state['agent_selection']!=selection['manifest']:
+        st.info('Je project of bronselectie is gewijzigd. Het onderstaande concept hoort nog bij de eerdere selectie; genereer een nieuw concept om de wijzigingen mee te nemen.')
     st.warning('Dit is een concept. Controleer de voorgestelde besluiten, nieuwe aannames en broncodes. Er worden geen formele ADR-besluiten genomen.')
     modified=st.text_area('Concept-JSON (bewerkbaar)',height=330,key='review_json')
+    st.download_button('Download concept-JSON',modified,file_name='concept_review.json',mime='application/json')
     st.caption('Notion krijgt bewerkbare tekst: samenvatting, wijzigingen, vijf lagen, gegevensstroom, ADR, regels en bronoverzicht. Diagramafbeeldingen worden in deze eerste versie niet geüpload.')
     publication_key=hashlib.sha256((modified+notion_parent+repr(st.session_state['agent_sources'])).encode()).hexdigest()
     approved=st.checkbox('Ik heb dit concept gereviewd en mag deze inhoud in de gekozen Notion-pagina publiceren.',key='approve_'+publication_key)
@@ -143,4 +151,4 @@ if 'result_zip' in st.session_state:
     st.image(st.session_state['result_png'],caption='Architectuurplaat (ook beschikbaar als bewerkbare SVG in ZIP)')
 
 st.divider()
-st.caption('Herhaalbaar: een volgende run op een eerder gegenereerd document vervangt uitsluitend de herkenbare agent-aanvulling. Oorspronkelijke hoofdstukken en goedgekeurde ADR’s blijven onaangetast.')
+st.caption('Elk resultaat blijft een concept. Controleer de onderbouwing en laat architectuurbesluiten via de afgesproken governance vaststellen.')
