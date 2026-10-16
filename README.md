@@ -1,5 +1,25 @@
 # Common Ground Architectuuragent
 
+## Publiceren in Notion
+
+Na review kun je het resultaat rechtstreeks als **nieuwe Notion-subpagina** publiceren. Word-export is optioneel. De pagina bevat bewerkbare koppen, samenvatting, wijzigingen met bronverwijzingen, vijf architectuurlagen, gegevensstroom, concept-ADR, architectuurregels, open besluiten, aannames en bronoverzicht. De inhoud blijft CONCEPT; publicatie maakt een voorstel niet tot vastgesteld besluit.
+
+Eenmalig instellen:
+
+1. Maak in Notion een interne integratie via **Settings → Connections → Develop or manage integrations** (of https://www.notion.so/profile/integrations). Geef deze leesrechten en het recht om inhoud toe te voegen (*Read content* en *Insert content*).
+2. Open de pagina waaronder de resultaten moeten komen en geef de integratie toegang via **… → Connections**. De naam van deze optie kan per Notion-versie verschillen.
+3. Start de app. Vul in de zijbalk de **Notion-integratiesleutel** en de link van de **bovenliggende Notion-pagina** in. Je kunt deze ook veilig instellen als `NOTION_TOKEN` en `NOTION_PARENT_PAGE_ID`. Zet echte sleutels nooit in Git of in chat. `.env` wordt niet automatisch geladen.
+4. Analyseer de bronnen, of laad een bestaande `concept_review.json` met de oorspronkelijke bronbestanden in dezelfde volgorde. Alleen bij nieuwe AI-analyse is het bestaande Word-document verplicht. Bij hergebruik moet de oorspronkelijke bronnummering behouden blijven: was het Word-document B00, upload het dan ook bij hergebruik.
+5. Controleer de JSON, vink de review/publicatiebevestiging aan en klik **Publiceer concept in Notion**. De app toont de link zodra Notion de publicatie bevestigt.
+
+Er is geen Word-export nodig voor deze publicatiestap en geen OpenAI-aanroep bij het laden van een bestaand concept. Alleen de gereviewde resultaattekst en bronverwijzingen gaan naar Notion, inclusief de daarin voorkomende bestandsnamen. Volledige bronbestanden worden niet meegestuurd.
+
+Deze eerste versie plaatst architectuurlagen en gegevensstroom als tekst/lijsten; SVG/PNG-afbeeldingen worden nog niet geüpload. Publicatie wijzigt geen bestaande pagina's en past geen openbare deelinstellingen aan. Wie het resultaat kan zien, wordt bepaald door de rechten van de bovenliggende Notion-pagina. Een database als bestemming of een bestaande pagina bijwerken wordt nog niet ondersteund.
+
+Publiceer dezelfde inhoud niet opnieuw na een onduidelijke verbindingsfout zonder eerst de doelpagina te controleren: Notion kan de pagina al hebben aangemaakt. Bij een fout tijdens een lange publicatie geeft de app de link naar de gedeeltelijk gevulde pagina. Er zijn geen automatische retries van schrijfverzoeken. Binnen dezelfde appsessie blokkeert de app herhaling van een bevestigde publicatie van hetzelfde concept naar dezelfde bestemming; na een herstart is dit geheugen leeg.
+
+Gecontroleerd met lokale tests en gemockte Notion-verzoeken; echte publicatie vereist jouw integratie en gedeelde doelpagina. De betaalde OpenAI-aanroep is niet meegenomen in deze controles.
+
 **Prototype 0.1 · Codex-klaar · lokaal draaiende webapp + commandoregel**
 
 Met deze app herhaal je de workflow waarmee een bestaande solutionarchitectuur is aangevuld met nieuwe bronstukken, een vijf-lagenarchitectuurplaat, een gegevensstroom en een ADR in de vorm **Context – Besluit – Principe – Implicatie – Eventuele zorgen – Implementatie**. Doelgroepen: architecten, analisten en productteams van Platform Dienstverlening / Common Ground.
@@ -99,7 +119,7 @@ Voor offline runs moeten de oorspronkelijke bestanden in dezelfde volgorde worde
 - **Geen ingelogde Notion/GitHub-connector:** exporteer de pagina of het document eerst naar PDF/Word.
 - **Bronkwaliteit:** bij scans zonder tekst stopt extractie met een foutmelding; niets wordt stilzwijgend genegeerd.
 - **Herleidbaarheid:** bronverwijzingen zijn op syntaxis en paginabereik gecontroleerd, niet op de semantische juistheid van elke zin. Menselijke toets vereist.
-- **Geen automatische wijzigingen in bronregistraties, GitHub of Notion.**
+- **Geen automatische wijzigingen in bronregistraties of GitHub.** Notion-publicatie gebeurt alleen met de expliciete publicatieknop na review.
 - **Conceptstatus:** alle nieuw gegenereerde ADR-teksten worden als concept aangeduid, ook wanneer de bronnen bestaande besluitvorming noemen.
 
 ## Codex-workflow
