@@ -1,0 +1,168 @@
+{
+  "title": "Signaalmanagement — tactische analyse",
+  "scope": "Signaalmanagement",
+  "management_summary": "Binnen deze epic ligt het accent op tactische patroonanalyse van signalen. De bestaande bronapplicaties blijven verantwoordelijk voor operationele behandeling. Signaalteksten worden bij voorkeur vóór aanlevering aan het datawarehouse geanonimiseerd en pas daarna gelabeld.",
+  "changes": [
+    {
+      "section": "Afbakening",
+      "change": "Tactische analyse staat centraal; operationele routering en afhandeling vallen buiten scope.",
+      "rationale": "Dit volgt uit de architectuurafstemming van 12 oktober.",
+      "evidence": [
+        "B01 p.7",
+        "B01 p.8"
+      ]
+    },
+    {
+      "section": "Componentenpositionering",
+      "change": "Maak anonimiserings- en labelingfuncties als aanroepbare generieke services beschikbaar.",
+      "rationale": "De bron beschrijft centraal onderhoud en lokaal toepasbare API-bouwstenen.",
+      "evidence": [
+        "B01 p.8",
+        "B01 p.9"
+      ]
+    },
+    {
+      "section": "Samenhang met bestaande ADR’s",
+      "change": "Bestaande ADR #009 over de klanttevredenheidscomponent blijft van kracht; leg de relatie met dit tactisch-analyseproject expliciet vast.",
+      "rationale": "De bestaande ADR kent een beperktere functionele reikwijdte en prioritering.",
+      "evidence": [
+        "B02 p.23"
+      ]
+    }
+  ],
+  "layers": [
+    {
+      "number": 5,
+      "name": "Interactielaag",
+      "components": [
+        "KCC-kanalen en contactmomenten",
+        "Meldingen en burgerformulieren",
+        "Dashboard voor tactische analyse"
+      ]
+    },
+    {
+      "number": 4,
+      "name": "Procesinrichting",
+      "components": [
+        "Operationele afhandeling blijft in bronsystemen",
+        "Menselijke prioritering van verbeterpunten"
+      ]
+    },
+    {
+      "number": 3,
+      "name": "Connectiviteit",
+      "components": [
+        "Gestandaardiseerde gegevensuitwisseling via API’s",
+        "Eventing en logging waar relevant"
+      ]
+    },
+    {
+      "number": 2,
+      "name": "Diensten",
+      "components": [
+        "Anonimiseringsservice (API)",
+        "Labelingsservice (API)",
+        "Centraal beheerde topicboom en model"
+      ]
+    },
+    {
+      "number": 1,
+      "name": "Gegevenslaag",
+      "components": [
+        "Gemeentelijke bronsystemen",
+        "Geanonimiseerd analytisch datawarehouse",
+        "Metadata, verwerkingsregistratie en audittrail"
+      ]
+    }
+  ],
+  "flow_steps": [
+    "Bronsysteem",
+    "Dataselectie",
+    "Anonimiseren",
+    "Datawarehouse",
+    "Labelen",
+    "Patronen analyseren",
+    "Verbeteracties"
+  ],
+  "adr": {
+    "title": "Signaalmanagement als tactische analysevoorziening",
+    "status": "Concept – ter besluitvorming",
+    "context": "Gemeenten ontvangen signalen in verschillende applicaties. De epic focust op verzamelde en geanonimiseerde signalen voor tactische verbetering.",
+    "decision": "Voorgesteld wordt om bronapplicaties eigenaar te laten van operationele behandeling, de anonimiseringsservice zo vroeg mogelijk te gebruiken en labeling op het datawarehouse toe te passen.",
+    "principles": [
+      "Hergebruik vóór nieuwbouw",
+      "Privacy by design",
+      "Een gezamenlijk labelingsmodel en topicboom",
+      "Open source en versieerbare API’s"
+    ],
+    "implications": [
+      "Lokale koppeling tussen bron en DWH",
+      "Centrale modeltrainingsketen",
+      "Geen nieuw verplicht operationeel signalenregister"
+    ],
+    "concerns": [
+      "Risico op herleidbaarheid ondanks maskering",
+      "Modelkwaliteit en verandering in taxonomie",
+      "Bevoegdheid tot gegevensdeling over gemeenten"
+    ],
+    "implementation": [
+      "Maak de twee service-API’s beschikbaar",
+      "Bepaal governance en beheerbudget",
+      "Ontwerp kwaliteits- en trainingstoetsen",
+      "Leg KPI’s vast in de backlog"
+    ],
+    "relation_existing_adrs": "ADR #009 over een klanttevredenheidscomponent blijft van kracht. Dit voorstel betreft een afzonderlijke tactische analysevoorziening en geldt niet als herroeping."
+  },
+  "decision_rules": [
+    {
+      "id": "DR-01",
+      "rule": "Operationele verwerking blijft bij bestaande bronsystemen",
+      "evidence": [
+        "B01 p.7",
+        "B01 p.8"
+      ],
+      "status": "Bronafspraak"
+    },
+    {
+      "id": "DR-02",
+      "rule": "Anonimiseer vóór levering aan DWH, tenzij onderbouwd alternatief",
+      "evidence": [
+        "B01 p.9"
+      ],
+      "status": "Bronafspraak"
+    },
+    {
+      "id": "DR-03",
+      "rule": "Voer labeling pas uit na de datawarehouseverzameling",
+      "evidence": [
+        "B01 p.9"
+      ],
+      "status": "Bronafspraak"
+    },
+    {
+      "id": "DR-04",
+      "rule": "Maak beide functies aanroepbaar met gestandaardiseerde API’s",
+      "evidence": [
+        "B01 p.8"
+      ],
+      "status": "Bronafspraak"
+    },
+    {
+      "id": "DR-05",
+      "rule": "Regel trainingssets en modelreleases tussen gemeenten en centraal beheer",
+      "evidence": [
+        "B01 p.8"
+      ],
+      "status": "Bronafspraak"
+    }
+  ],
+  "open_decisions": [
+    "Welke partij krijgt formeel beheer en releaseverantwoordelijkheid?",
+    "Wat is de verwerkingsgrondslag en het anonimisatietoetsingskader?",
+    "Wat wordt de versieerstrategie van de gemeenschappelijke topicboom?"
+  ],
+  "assumptions": [
+    "Dit voorbeeld is een illustratieve concept-output, geen formeel vastgestelde ADR.",
+    "Het datawarehouse verwerkt alleen gegevens waarvoor rechtmatig toegang is verkregen."
+  ]
+}

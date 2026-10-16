@@ -1,0 +1,7 @@
+python-docx>=1.1,<2
+pymupdf>=1.24,<2
+openai>=1.40,<3
+cairosvg>=2.7,<3
+streamlit>=1.37,<2
+Pillow>=10,<13
+pytest>=8,<10
