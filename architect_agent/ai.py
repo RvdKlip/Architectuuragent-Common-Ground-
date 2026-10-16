@@ -21,6 +21,10 @@ REGELS:
 - Architectuur is generiek: formuleer project-specifieke details uitsluitend
   wanneer die onderbouwd zijn. Gebruikt exact vijf lagen (1 t/m 5).
 - Architectuurplaat toont COMPONENTEN per laag, geen willekeurige details.
+- Als een Bouwblokkenadvies is aangeleverd: verwerk de geselecteerde ABB's en
+  SBB's als VOORSTEL in de lagen en wijzigingen. Toets hun toepasbaarheid aan
+  de andere bronnen; leg conflicten expliciet voor en behandel de selectie
+  nooit als vastgesteld besluit of als bewijs van een verplichting.
 - Duidelijk onderscheid tussen anonimiseren, maskeren en pseudonimiseren. Claims
   over anonieme gegevens vereisen onderbouwing/toets.
 - Status ADR exact 'Concept – ter besluitvorming'. Geen definitief nummer kiezen.

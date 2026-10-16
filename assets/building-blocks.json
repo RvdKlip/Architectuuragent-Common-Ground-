@@ -1,0 +1,943 @@
+{
+  "source": {
+    "url": "https://github.com/ivorstenbosch-maker/EnterpriseArchitectuurCG/blob/main/Enterprisearchitectuur-GPT.md",
+    "sha256": "ddccb045ee42452623ff7d4be9a6ee6fb9c5db368289c11e4616332b88c73f2e",
+    "retrieved_at": "2026-10-16T10:36:06.731441+00:00"
+  },
+  "method": "Lokaal trefwoordadvies; ABB/SBB-relaties komen letterlijk uit de bronmapping.",
+  "abbs": [
+    {
+      "id": "abb-2d9c93a6c7b3",
+      "type": "ABB",
+      "name": "Gebruikersinteractie via portalen faciliteert",
+      "layer": "Laag 5 – Interactie",
+      "terms": [
+        "portaal",
+        "portalen",
+        "selfservice",
+        "self-service",
+        "mijnomgeving",
+        "inwonerportaal",
+        "nl portal"
+      ],
+      "sbb_ids": [
+        "sbb-d91a05adc0c1"
+      ],
+      "quote": "| Gebruikersinteractie via portalen faciliteert | NL Portal |",
+      "line": 4772,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 5 – Interactie"
+    },
+    {
+      "id": "abb-c156166726a6",
+      "type": "ABB",
+      "name": "Self-service functionaliteit biedt voor inwoners en ondernemers",
+      "layer": "Laag 5 – Interactie",
+      "terms": [
+        "portaal",
+        "portalen",
+        "selfservice",
+        "self-service",
+        "mijnomgeving",
+        "inwonerportaal",
+        "nl portal"
+      ],
+      "sbb_ids": [
+        "sbb-d91a05adc0c1"
+      ],
+      "quote": "| Self-service functionaliteit biedt voor inwoners en ondernemers | NL Portal |",
+      "line": 4773,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 5 – Interactie"
+    },
+    {
+      "id": "abb-6b387d428ea4",
+      "type": "ABB",
+      "name": "Digitale formulieren aanbiedt en verwerkt",
+      "layer": "Laag 5 – Interactie",
+      "terms": [
+        "formulier",
+        "formulieren",
+        "aanvraag",
+        "aanvragen",
+        "intake",
+        "open formulieren"
+      ],
+      "sbb_ids": [
+        "sbb-e0bbb07aff4c"
+      ],
+      "quote": "| Digitale formulieren aanbiedt en verwerkt | Open Formulieren |",
+      "line": 4774,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 5 – Interactie"
+    },
+    {
+      "id": "abb-0cde6d22a371",
+      "type": "ABB",
+      "name": "Geïntegreerde klant- en objectbeelden toont",
+      "layer": "Laag 5 – Interactie",
+      "terms": [
+        "klantbeeld",
+        "objectbeeld",
+        "contactmoment",
+        "klantcontact",
+        "integraal klantbeeld",
+        "iko"
+      ],
+      "sbb_ids": [
+        "sbb-f8d4de878d05"
+      ],
+      "quote": "| Geïntegreerde klant- en objectbeelden toont | IKO |",
+      "line": 4775,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 5 – Interactie"
+    },
+    {
+      "id": "abb-e13a65ce2411",
+      "type": "ABB",
+      "name": "Procesuitvoering en werkvoorraad visualiseert voor medewerkers",
+      "layer": "Laag 5 – Interactie",
+      "terms": [
+        "werkvoorraad",
+        "medewerkerinterface",
+        "procesuitvoering",
+        "gzac (ui)"
+      ],
+      "sbb_ids": [
+        "sbb-a063e4b75b99"
+      ],
+      "quote": "| Procesuitvoering en werkvoorraad visualiseert voor medewerkers | GZAC (UI) |",
+      "line": 4776,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 5 – Interactie"
+    },
+    {
+      "id": "abb-39cd72e5ede1",
+      "type": "ABB",
+      "name": "Functioneel beheer en configuratie ondersteunt",
+      "layer": "Laag 5 – Interactie",
+      "terms": [
+        "functioneel beheer",
+        "beheerinterface",
+        "configuratiebeheer",
+        "openbeheer"
+      ],
+      "sbb_ids": [
+        "sbb-b170316a856e"
+      ],
+      "quote": "| Functioneel beheer en configuratie ondersteunt | OpenBeheer |",
+      "line": 4777,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 5 – Interactie"
+    },
+    {
+      "id": "abb-d115f1c1310c",
+      "type": "ABB",
+      "name": "Procesflows orkestreert en bewaakt",
+      "layer": "Laag 4 – Procesinrichting",
+      "terms": [
+        "proces",
+        "processen",
+        "workflow",
+        "bpmn",
+        "orkestratie",
+        "gzac"
+      ],
+      "sbb_ids": [
+        "sbb-9c1742a10e6f"
+      ],
+      "quote": "| Procesflows orkestreert en bewaakt | GZAC                |",
+      "line": 4783,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 4 – Procesinrichting"
+    },
+    {
+      "id": "abb-be09c22d3701",
+      "type": "ABB",
+      "name": "Besluitvorming ondersteunt",
+      "layer": "Laag 4 – Procesinrichting",
+      "terms": [
+        "besluitvorming",
+        "beschikking",
+        "besluiten",
+        "gzac"
+      ],
+      "sbb_ids": [
+        "sbb-9c1742a10e6f"
+      ],
+      "quote": "| Besluitvorming ondersteunt         | GZAC                |",
+      "line": 4784,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 4 – Procesinrichting"
+    },
+    {
+      "id": "abb-ea10567b1f08",
+      "type": "ABB",
+      "name": "Business rules beheert en uitvoert",
+      "layer": "Laag 4 – Procesinrichting",
+      "terms": [
+        "dmn",
+        "beslisregel",
+        "beslisregels",
+        "business rules",
+        "bedrijfsregels",
+        "dmn studio & engine"
+      ],
+      "sbb_ids": [
+        "sbb-7027e32f27b7"
+      ],
+      "quote": "| Business rules beheert en uitvoert | DMN Studio & Engine |",
+      "line": 4785,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 4 – Procesinrichting"
+    },
+    {
+      "id": "abb-54a8a6618ea3",
+      "type": "ABB",
+      "name": "Werkvoorraad en taken organiseert",
+      "layer": "Laag 4 – Procesinrichting",
+      "terms": [
+        "werkvoorraad",
+        "taak",
+        "taken",
+        "workflow",
+        "taak & workflow"
+      ],
+      "sbb_ids": [
+        "sbb-550f3e9499b2"
+      ],
+      "quote": "| Werkvoorraad en taken organiseert  | Taak & Workflow     |",
+      "line": 4786,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 4 – Procesinrichting"
+    },
+    {
+      "id": "abb-05204b6e9382",
+      "type": "ABB",
+      "name": "Casus- en procesregie ondersteunt",
+      "layer": "Laag 4 – Procesinrichting",
+      "terms": [
+        "casus",
+        "casusregie",
+        "dossier",
+        "zaakafhandeling",
+        "gzac"
+      ],
+      "sbb_ids": [
+        "sbb-9c1742a10e6f"
+      ],
+      "quote": "| Casus- en procesregie ondersteunt  | GZAC                |",
+      "line": 4787,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 4 – Procesinrichting"
+    },
+    {
+      "id": "abb-efedd3e8f7c7",
+      "type": "ABB",
+      "name": "Gegevensuitwisseling tussen organisaties faciliteert",
+      "layer": "Laag 3 – Connectiviteit",
+      "terms": [
+        "fsc",
+        "gegevensuitwisseling",
+        "ketenpartner",
+        "federatief",
+        "organisatie-overstijgend",
+        "openfsc"
+      ],
+      "sbb_ids": [
+        "sbb-6325c9036321"
+      ],
+      "quote": "| Gegevensuitwisseling tussen organisaties faciliteert | OpenFSC          |",
+      "line": 4793,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 3 – Connectiviteit"
+    },
+    {
+      "id": "abb-2f1a83eb8a49",
+      "type": "ABB",
+      "name": "Notificaties publiceert en distribueert",
+      "layer": "Laag 3 – Connectiviteit",
+      "terms": [
+        "notificatie",
+        "notificaties",
+        "eventgedreven",
+        "events",
+        "gebeurtenis",
+        "opennotificaties"
+      ],
+      "sbb_ids": [
+        "sbb-86fa162aa4d1"
+      ],
+      "quote": "| Notificaties publiceert en distribueert              | OpenNotificaties |",
+      "line": 4794,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 3 – Connectiviteit"
+    },
+    {
+      "id": "abb-b87ef8640141",
+      "type": "ABB",
+      "name": "Omnichannel communicatie verzorgt",
+      "layer": "Laag 3 – Connectiviteit",
+      "terms": [
+        "omnichannel",
+        "communicatie",
+        "e-mail",
+        "sms",
+        "notify",
+        "notifynl omc"
+      ],
+      "sbb_ids": [
+        "sbb-4b012fed237e"
+      ],
+      "quote": "| Omnichannel communicatie verzorgt                    | NotifyNL OMC     |",
+      "line": 4795,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 3 – Connectiviteit"
+    },
+    {
+      "id": "abb-1087f3a264c1",
+      "type": "ABB",
+      "name": "Logging, auditing en tracing faciliteert",
+      "layer": "Laag 3 – Connectiviteit",
+      "terms": [
+        "logging",
+        "auditing",
+        "audittrail",
+        "tracing",
+        "platform"
+      ],
+      "sbb_ids": [
+        "sbb-c78ffe195710"
+      ],
+      "quote": "| Logging, auditing en tracing faciliteert             | Platform         |",
+      "line": 4796,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 3 – Connectiviteit"
+    },
+    {
+      "id": "abb-509603c8b0e5",
+      "type": "ABB",
+      "name": "Klantgegevens valideert en ontsluit",
+      "layer": "Laag 2 – Diensten",
+      "terms": [
+        "klant",
+        "klanten",
+        "klantgegevens",
+        "klantcontact",
+        "contactmoment",
+        "openklant api"
+      ],
+      "sbb_ids": [
+        "sbb-95d1c460bf1a"
+      ],
+      "quote": "| Klantgegevens valideert en ontsluit   | OpenKlant API         |",
+      "line": 4802,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 2 – Diensten"
+    },
+    {
+      "id": "abb-ae649f0c0d6c",
+      "type": "ABB",
+      "name": "Zaakgegevens valideert en ontsluit",
+      "layer": "Laag 2 – Diensten",
+      "terms": [
+        "zaak",
+        "zaken",
+        "zaakgericht",
+        "zaakgegevens",
+        "zaakafhandeling",
+        "openzaak api"
+      ],
+      "sbb_ids": [
+        "sbb-4e2ccf5d39fa"
+      ],
+      "quote": "| Zaakgegevens valideert en ontsluit    | OpenZaak API          |",
+      "line": 4803,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 2 – Diensten"
+    },
+    {
+      "id": "abb-1a88ffb472ad",
+      "type": "ABB",
+      "name": "Productgegevens valideert en ontsluit",
+      "layer": "Laag 2 – Diensten",
+      "terms": [
+        "productgegevens",
+        "productcatalogus",
+        "dienstencatalogus",
+        "pdc",
+        "openproduct api"
+      ],
+      "sbb_ids": [
+        "sbb-a9f9dec0abbd"
+      ],
+      "quote": "| Productgegevens valideert en ontsluit | OpenProduct API       |",
+      "line": 4804,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 2 – Diensten"
+    },
+    {
+      "id": "abb-aa04dc6b350c",
+      "type": "ABB",
+      "name": "Verzoeken beheert",
+      "layer": "Laag 2 – Diensten",
+      "terms": [
+        "verzoek",
+        "verzoeken",
+        "vtb",
+        "verzoeken (vtb)"
+      ],
+      "sbb_ids": [
+        "sbb-a0e16f3a2dbb"
+      ],
+      "quote": "| Verzoeken beheert                     | Verzoeken (VTB)       |",
+      "line": 4805,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 2 – Diensten"
+    },
+    {
+      "id": "abb-d47dbe1415e9",
+      "type": "ABB",
+      "name": "Taken beheert",
+      "layer": "Laag 2 – Diensten",
+      "terms": [
+        "taak",
+        "taken",
+        "vtb",
+        "taken (vtb)"
+      ],
+      "sbb_ids": [
+        "sbb-c23957e31a5d"
+      ],
+      "quote": "| Taken beheert                         | Taken (VTB)           |",
+      "line": 4806,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 2 – Diensten"
+    },
+    {
+      "id": "abb-28a4b5963ee1",
+      "type": "ABB",
+      "name": "Berichten beheert",
+      "layer": "Laag 2 – Diensten",
+      "terms": [
+        "bericht",
+        "berichten",
+        "vtb",
+        "berichten (vtb)"
+      ],
+      "sbb_ids": [
+        "sbb-cd087bd2c800"
+      ],
+      "quote": "| Berichten beheert                     | Berichten (VTB)       |",
+      "line": 4807,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 2 – Diensten"
+    },
+    {
+      "id": "abb-ad8a99b73e1c",
+      "type": "ABB",
+      "name": "Referentiegegevens ontsluit",
+      "layer": "Laag 2 – Diensten",
+      "terms": [
+        "referentielijst",
+        "referentiegegevens",
+        "keuzelijst",
+        "referentielijsten api"
+      ],
+      "sbb_ids": [
+        "sbb-47af3e44e863"
+      ],
+      "quote": "| Referentiegegevens ontsluit           | Referentielijsten API |",
+      "line": 4808,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 2 – Diensten"
+    },
+    {
+      "id": "abb-20ef4529a8dd",
+      "type": "ABB",
+      "name": "Generieke objecten ontsluit",
+      "layer": "Laag 2 – Diensten",
+      "terms": [
+        "objects",
+        "objecten",
+        "objectregistratie",
+        "objectgegevens",
+        "objects api"
+      ],
+      "sbb_ids": [
+        "sbb-73c3d4c4fa2b"
+      ],
+      "quote": "| Generieke objecten ontsluit           | Objects API           |",
+      "line": 4809,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 2 – Diensten"
+    },
+    {
+      "id": "abb-f206ee46a6f0",
+      "type": "ABB",
+      "name": "Personen en organisaties registreert",
+      "layer": "Laag 1 – Registraties",
+      "terms": [
+        "klant",
+        "klanten",
+        "persoonsgegevens",
+        "klantgegevens",
+        "contactmoment",
+        "openklant registratie"
+      ],
+      "sbb_ids": [
+        "sbb-0985696eb508"
+      ],
+      "quote": "| Personen en organisaties registreert            | OpenKlant Registratie   |",
+      "line": 4815,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 1 – Registraties"
+    },
+    {
+      "id": "abb-1fb9074be7dd",
+      "type": "ABB",
+      "name": "Zaken en procescontext vastlegt",
+      "layer": "Laag 1 – Registraties",
+      "terms": [
+        "zaak",
+        "zaken",
+        "zaakgegevens",
+        "zaakafhandeling",
+        "zaakgericht",
+        "openzaak registratie"
+      ],
+      "sbb_ids": [
+        "sbb-7364ed9d700e"
+      ],
+      "quote": "| Zaken en procescontext vastlegt                 | OpenZaak Registratie    |",
+      "line": 4816,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 1 – Registraties"
+    },
+    {
+      "id": "abb-266787938415",
+      "type": "ABB",
+      "name": "Producten en diensten registreert",
+      "layer": "Laag 1 – Registraties",
+      "terms": [
+        "productcatalogus",
+        "dienstencatalogus",
+        "productregistratie",
+        "pdc",
+        "openproduct registratie"
+      ],
+      "sbb_ids": [
+        "sbb-1ae741ab96a6"
+      ],
+      "quote": "| Producten en diensten registreert               | OpenProduct Registratie |",
+      "line": 4817,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 1 – Registraties"
+    },
+    {
+      "id": "abb-fa24196ad37a",
+      "type": "ABB",
+      "name": "Organisaties en medewerkers beheert",
+      "layer": "Laag 1 – Registraties",
+      "terms": [
+        "openorganisatie",
+        "organisatieregister",
+        "medewerkersregister"
+      ],
+      "sbb_ids": [
+        "sbb-4f062e7d0d98"
+      ],
+      "quote": "| Organisaties en medewerkers beheert             | OpenOrganisatie         |",
+      "line": 4818,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 1 – Registraties"
+    },
+    {
+      "id": "abb-3cc3fd42807f",
+      "type": "ABB",
+      "name": "Domeinspecifieke gegevens beheert",
+      "layer": "Laag 1 – Registraties",
+      "terms": [
+        "domeinregistratie",
+        "domeinspecifiek",
+        "domeinmodel",
+        "domeinregistraties"
+      ],
+      "sbb_ids": [
+        "sbb-a88c7805a428"
+      ],
+      "quote": "| Domeinspecifieke gegevens beheert               | Domeinregistraties      |",
+      "line": 4819,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 1 – Registraties"
+    },
+    {
+      "id": "abb-42ac527ccd5b",
+      "type": "ABB",
+      "name": "Verzoeken, taken en berichten duurzaam vastlegt",
+      "layer": "Laag 1 – Registraties",
+      "terms": [
+        "verzoek",
+        "verzoeken",
+        "taak",
+        "taken",
+        "bericht",
+        "berichten",
+        "vtb",
+        "vtb-registraties"
+      ],
+      "sbb_ids": [
+        "sbb-0f9437d64ce5"
+      ],
+      "quote": "| Verzoeken, taken en berichten duurzaam vastlegt | VTB-registraties        |",
+      "line": 4820,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 1 – Registraties"
+    },
+    {
+      "id": "abb-82222ef9f662",
+      "type": "ABB",
+      "name": "Referentiegegevens beheert",
+      "layer": "Laag 1 – Registraties",
+      "terms": [
+        "referentielijst",
+        "referentiegegevens",
+        "keuzelijst",
+        "referentielijsten"
+      ],
+      "sbb_ids": [
+        "sbb-55b8bc9a596d"
+      ],
+      "quote": "| Referentiegegevens beheert                      | Referentielijsten       |",
+      "line": 4821,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Laag 1 – Registraties"
+    },
+    {
+      "id": "abb-cce0d0137e74",
+      "type": "ABB",
+      "name": "Duurzame toegankelijkheid en bewaartermijnen beheert",
+      "layer": "Doorsnijdende voorzieningen",
+      "terms": [
+        "archief",
+        "archiveren",
+        "archivering",
+        "bewaartermijn",
+        "duurzame toegankelijkheid",
+        "vernietiging",
+        "registraties, openarchiefbeheer"
+      ],
+      "sbb_ids": [
+        "sbb-781d460085be"
+      ],
+      "quote": "| Duurzame toegankelijkheid en bewaartermijnen beheert | Registraties, OpenArchiefBeheer |",
+      "line": 4827,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Doorsnijdende voorzieningen"
+    },
+    {
+      "id": "abb-5d49957ad9d9",
+      "type": "ABB",
+      "name": "Authenticatie en autorisatie verzorgt",
+      "layer": "Doorsnijdende voorzieningen",
+      "terms": [
+        "authenticatie",
+        "autorisatie",
+        "keycloak",
+        "digid",
+        "inloggen",
+        "identity",
+        "keycloak / autorisatieservice"
+      ],
+      "sbb_ids": [
+        "sbb-959e12ad53eb"
+      ],
+      "quote": "| Authenticatie en autorisatie verzorgt | Keycloak / Autorisatieservice |",
+      "line": 4828,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Doorsnijdende voorzieningen"
+    },
+    {
+      "id": "abb-ff07c91898e9",
+      "type": "ABB",
+      "name": "Monitoring en observability ondersteunt",
+      "layer": "Doorsnijdende voorzieningen",
+      "terms": [
+        "monitoring",
+        "observability",
+        "metriek",
+        "platformvoorzieningen"
+      ],
+      "sbb_ids": [
+        "sbb-baae725bdd08"
+      ],
+      "quote": "| Monitoring en observability ondersteunt | Platformvoorzieningen |",
+      "line": 4829,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Doorsnijdende voorzieningen"
+    },
+    {
+      "id": "abb-a552fe429a8e",
+      "type": "ABB",
+      "name": "Privacy, security en compliance ondersteunt",
+      "layer": "Doorsnijdende voorzieningen",
+      "terms": [
+        "privacy",
+        "security",
+        "beveiliging",
+        "informatiebeveiliging",
+        "avg",
+        "platformvoorzieningen"
+      ],
+      "sbb_ids": [
+        "sbb-baae725bdd08"
+      ],
+      "quote": "| Privacy, security en compliance ondersteunt | Platformvoorzieningen |",
+      "line": 4830,
+      "section": "Solution Building Blocks (SBB’s) en mapping op ABB’s / Doorsnijdende voorzieningen"
+    }
+  ],
+  "sbbs": [
+    {
+      "id": "sbb-d91a05adc0c1",
+      "type": "SBB",
+      "name": "NL Portal",
+      "abb_ids": [
+        "abb-2d9c93a6c7b3",
+        "abb-c156166726a6"
+      ],
+      "layer": "Laag 5 – Interactie"
+    },
+    {
+      "id": "sbb-e0bbb07aff4c",
+      "type": "SBB",
+      "name": "Open Formulieren",
+      "abb_ids": [
+        "abb-6b387d428ea4"
+      ],
+      "layer": "Laag 5 – Interactie"
+    },
+    {
+      "id": "sbb-f8d4de878d05",
+      "type": "SBB",
+      "name": "IKO",
+      "abb_ids": [
+        "abb-0cde6d22a371"
+      ],
+      "layer": "Laag 5 – Interactie"
+    },
+    {
+      "id": "sbb-a063e4b75b99",
+      "type": "SBB",
+      "name": "GZAC (UI)",
+      "abb_ids": [
+        "abb-e13a65ce2411"
+      ],
+      "layer": "Laag 5 – Interactie"
+    },
+    {
+      "id": "sbb-b170316a856e",
+      "type": "SBB",
+      "name": "OpenBeheer",
+      "abb_ids": [
+        "abb-39cd72e5ede1"
+      ],
+      "layer": "Laag 5 – Interactie"
+    },
+    {
+      "id": "sbb-9c1742a10e6f",
+      "type": "SBB",
+      "name": "GZAC",
+      "abb_ids": [
+        "abb-d115f1c1310c",
+        "abb-be09c22d3701",
+        "abb-05204b6e9382"
+      ],
+      "layer": "Laag 4 – Procesinrichting"
+    },
+    {
+      "id": "sbb-7027e32f27b7",
+      "type": "SBB",
+      "name": "DMN Studio & Engine",
+      "abb_ids": [
+        "abb-ea10567b1f08"
+      ],
+      "layer": "Laag 4 – Procesinrichting"
+    },
+    {
+      "id": "sbb-550f3e9499b2",
+      "type": "SBB",
+      "name": "Taak & Workflow",
+      "abb_ids": [
+        "abb-54a8a6618ea3"
+      ],
+      "layer": "Laag 4 – Procesinrichting"
+    },
+    {
+      "id": "sbb-6325c9036321",
+      "type": "SBB",
+      "name": "OpenFSC",
+      "abb_ids": [
+        "abb-efedd3e8f7c7"
+      ],
+      "layer": "Laag 3 – Connectiviteit"
+    },
+    {
+      "id": "sbb-86fa162aa4d1",
+      "type": "SBB",
+      "name": "OpenNotificaties",
+      "abb_ids": [
+        "abb-2f1a83eb8a49"
+      ],
+      "layer": "Laag 3 – Connectiviteit"
+    },
+    {
+      "id": "sbb-4b012fed237e",
+      "type": "SBB",
+      "name": "NotifyNL OMC",
+      "abb_ids": [
+        "abb-b87ef8640141"
+      ],
+      "layer": "Laag 3 – Connectiviteit"
+    },
+    {
+      "id": "sbb-c78ffe195710",
+      "type": "SBB",
+      "name": "Platform",
+      "abb_ids": [
+        "abb-1087f3a264c1"
+      ],
+      "layer": "Laag 3 – Connectiviteit"
+    },
+    {
+      "id": "sbb-95d1c460bf1a",
+      "type": "SBB",
+      "name": "OpenKlant API",
+      "abb_ids": [
+        "abb-509603c8b0e5"
+      ],
+      "layer": "Laag 2 – Diensten"
+    },
+    {
+      "id": "sbb-4e2ccf5d39fa",
+      "type": "SBB",
+      "name": "OpenZaak API",
+      "abb_ids": [
+        "abb-ae649f0c0d6c"
+      ],
+      "layer": "Laag 2 – Diensten"
+    },
+    {
+      "id": "sbb-a9f9dec0abbd",
+      "type": "SBB",
+      "name": "OpenProduct API",
+      "abb_ids": [
+        "abb-1a88ffb472ad"
+      ],
+      "layer": "Laag 2 – Diensten"
+    },
+    {
+      "id": "sbb-a0e16f3a2dbb",
+      "type": "SBB",
+      "name": "Verzoeken (VTB)",
+      "abb_ids": [
+        "abb-aa04dc6b350c"
+      ],
+      "layer": "Laag 2 – Diensten"
+    },
+    {
+      "id": "sbb-c23957e31a5d",
+      "type": "SBB",
+      "name": "Taken (VTB)",
+      "abb_ids": [
+        "abb-d47dbe1415e9"
+      ],
+      "layer": "Laag 2 – Diensten"
+    },
+    {
+      "id": "sbb-cd087bd2c800",
+      "type": "SBB",
+      "name": "Berichten (VTB)",
+      "abb_ids": [
+        "abb-28a4b5963ee1"
+      ],
+      "layer": "Laag 2 – Diensten"
+    },
+    {
+      "id": "sbb-47af3e44e863",
+      "type": "SBB",
+      "name": "Referentielijsten API",
+      "abb_ids": [
+        "abb-ad8a99b73e1c"
+      ],
+      "layer": "Laag 2 – Diensten"
+    },
+    {
+      "id": "sbb-73c3d4c4fa2b",
+      "type": "SBB",
+      "name": "Objects API",
+      "abb_ids": [
+        "abb-20ef4529a8dd"
+      ],
+      "layer": "Laag 2 – Diensten"
+    },
+    {
+      "id": "sbb-0985696eb508",
+      "type": "SBB",
+      "name": "OpenKlant Registratie",
+      "abb_ids": [
+        "abb-f206ee46a6f0"
+      ],
+      "layer": "Laag 1 – Registraties"
+    },
+    {
+      "id": "sbb-7364ed9d700e",
+      "type": "SBB",
+      "name": "OpenZaak Registratie",
+      "abb_ids": [
+        "abb-1fb9074be7dd"
+      ],
+      "layer": "Laag 1 – Registraties"
+    },
+    {
+      "id": "sbb-1ae741ab96a6",
+      "type": "SBB",
+      "name": "OpenProduct Registratie",
+      "abb_ids": [
+        "abb-266787938415"
+      ],
+      "layer": "Laag 1 – Registraties"
+    },
+    {
+      "id": "sbb-4f062e7d0d98",
+      "type": "SBB",
+      "name": "OpenOrganisatie",
+      "abb_ids": [
+        "abb-fa24196ad37a"
+      ],
+      "layer": "Laag 1 – Registraties"
+    },
+    {
+      "id": "sbb-a88c7805a428",
+      "type": "SBB",
+      "name": "Domeinregistraties",
+      "abb_ids": [
+        "abb-3cc3fd42807f"
+      ],
+      "layer": "Laag 1 – Registraties"
+    },
+    {
+      "id": "sbb-0f9437d64ce5",
+      "type": "SBB",
+      "name": "VTB-registraties",
+      "abb_ids": [
+        "abb-42ac527ccd5b"
+      ],
+      "layer": "Laag 1 – Registraties"
+    },
+    {
+      "id": "sbb-55b8bc9a596d",
+      "type": "SBB",
+      "name": "Referentielijsten",
+      "abb_ids": [
+        "abb-82222ef9f662"
+      ],
+      "layer": "Laag 1 – Registraties"
+    },
+    {
+      "id": "sbb-781d460085be",
+      "type": "SBB",
+      "name": "Registraties, OpenArchiefBeheer",
+      "abb_ids": [
+        "abb-cce0d0137e74"
+      ],
+      "layer": "Doorsnijdende voorzieningen"
+    },
+    {
+      "id": "sbb-959e12ad53eb",
+      "type": "SBB",
+      "name": "Keycloak / Autorisatieservice",
+      "abb_ids": [
+        "abb-5d49957ad9d9"
+      ],
+      "layer": "Doorsnijdende voorzieningen"
+    },
+    {
+      "id": "sbb-baae725bdd08",
+      "type": "SBB",
+      "name": "Platformvoorzieningen",
+      "abb_ids": [
+        "abb-ff07c91898e9",
+        "abb-a552fe429a8e"
+      ],
+      "layer": "Doorsnijdende voorzieningen"
+    }
+  ]
+}

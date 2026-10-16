@@ -8,8 +8,10 @@ from .catalogue import (
     CACHE, ENTERPRISE_GITHUB, ENTERPRISE_GITBOOK,
     chapter_document, chapters, load_enterprise,
 )
-from .selection import SOURCE_OPTIONS, SelectedDocument, missing_sources
+from .selection import HORIZON_URL, SOURCE_OPTIONS, SelectedDocument, missing_sources
 from .presentation import render_hero, render_steps
+from .building_blocks_ui import render_building_blocks
+from .building_blocks import advice_document
 
 
 def render_selection() -> dict:
@@ -39,7 +41,8 @@ def render_selection() -> dict:
     enterprise_metadata = None
     columns = st.columns(2)
     for index, option in enumerate(SOURCE_OPTIONS):
-        with columns[index % 2], st.container(border=True, key='source_'+option.key):
+        column_index = 0 if index == 0 else (index+1) % 2
+        with columns[column_index], st.container(border=True, key='source_'+option.key):
             enabled = st.checkbox(option.title, value=option.key == 'enterprise', key='use_'+option.key)
             st.caption(option.description)
             if enabled:
@@ -88,12 +91,17 @@ def render_selection() -> dict:
                     if enabled:
                         documents.extend(SelectedDocument(option.key, f.name, f.getvalue()) for f in files or [])
             else:
+                if option.key == 'horizon':
+                    st.markdown('[Open Horizon Rotterdam ↗]('+HORIZON_URL+')')
+                    st.caption('De link alleen wordt niet ingelezen. Voeg een Horizon-export toe om de inhoud lokaal mee te wegen in het advies. Rotterdamse oplossingen worden niet verzonnen of als verplicht aangemerkt zonder bronbewijs.')
                 st.caption('Eigen bron toevoegen · ' + option.purpose)
                 files = st.file_uploader('Documenten toevoegen', type=['pdf', 'docx', 'txt', 'md'],
                                          accept_multiple_files=True, key='files_'+option.key, disabled=not enabled)
                 if enabled:
                     documents.extend(SelectedDocument(option.key, f.name, f.getvalue()) for f in files or [])
                     st.caption(f'{len(files or [])} bestanden toegevoegd' if files else 'Nog geen document toegevoegd')
+        if index == 0:
+            building_blocks_slot = columns[1].container(border=True, key='building_blocks_card')
 
     with st.container(border=True):
         st.markdown('**Projectdocumenten en overige bronnen**')
@@ -103,6 +111,12 @@ def render_selection() -> dict:
             digest = hashlib.sha256(file.getvalue()).hexdigest()[:16]
             if st.checkbox(file.name, value=True, key=f'extra_{index}_{digest}'):
                 documents.append(SelectedDocument('project', file.name, file.getvalue()))
+
+    with building_blocks_slot:
+        building_blocks, building_catalogue = render_building_blocks(scope, goals, documents, base)
+    if building_blocks['selected']:
+        documents.append(SelectedDocument('building_blocks', 'Bouwblokkenadvies.md',
+                                         advice_document(building_blocks, building_catalogue).encode('utf-8')))
 
     missing = missing_sources(selected, documents)
     st.subheader('Jouw bronselectie')
@@ -116,6 +130,7 @@ def render_selection() -> dict:
         rows.append({'Broncode': 'B00', 'Bron': base.name, 'Categorie': 'Bestaande architectuur'})
         offset = 1
     titles = {o.key: o.title for o in SOURCE_OPTIONS}
+    titles['building_blocks'] = 'Bouwblokkenadvies — te beoordelen'
     for index, document in enumerate(documents, offset):
         rows.append({'Broncode': f'B{index:02d}', 'Bron': document.name,
                      'Categorie': titles.get(document.category, 'Projectdocument')})
@@ -127,7 +142,9 @@ def render_selection() -> dict:
     if missing:
         st.warning('Nog inhoud nodig voor: ' + '; '.join(missing))
     manifest = {'project': scope, 'goals': goals, 'type': mode, 'sources': rows,
-                'missing': missing, 'enterprise_architecture': enterprise_metadata}
+                'missing': missing, 'enterprise_architecture': enterprise_metadata,
+                'building_blocks': building_blocks,
+                'horizon': {'url': HORIZON_URL, 'content_loaded': any(d.category == 'horizon' for d in documents)}}
     st.download_button('Download bronselectie', json.dumps(manifest, ensure_ascii=False, indent=2),
                        file_name='bronselectie.json', mime='application/json')
     return {'project_start': project_start, 'scope': scope, 'goals': goals, 'base': base,

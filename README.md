@@ -4,7 +4,7 @@
 
 Download `index.html` en open dit bestand met een dubbelklik in je browser. Het donkere app-scherm en de architectuurafbeelding zitten samen in dit ene bestand; hiervoor is geen Python, Streamlit of webserver nodig.
 
-Je kunt projectgegevens invullen, bronnen selecteren, lokale documenten kiezen, de openbare enterprise architectuur ophalen en hoofdstukken selecteren, en de bronselectie als JSON downloaden. Voor het ophalen van de openbare bron is internet nodig; een eigen versie uploaden werkt ook zonder internet. Lokale documenten worden in dit scherm alleen geselecteerd, niet inhoudelijk geanalyseerd of verstuurd. Het JSON-bestand bevat de bronkeuze en bestandsmetadata, geen kopieën van de lokale bestanden. Dit zelfstandige scherm genereert geen AI-resultaten en publiceert niets in Notion; daarvoor blijft de Python-app beschikbaar.
+Je kunt projectgegevens invullen, bronnen selecteren, lokale documenten kiezen, de openbare enterprise architectuur ophalen en hoofdstukken selecteren, en de bronselectie inclusief bouwblokkenadvies als JSON downloaden. Voor het ophalen van de openbare bron is internet nodig; een eigen versie uploaden werkt ook zonder internet. Geselecteerde PDF-, DOCX-, TXT- en Markdown-documenten worden lokaal gelezen voor het bouwblokkenadvies. Er worden geen documentbestanden naar externe diensten verstuurd. Het JSON-bestand bevat de bronkeuze, bestandsmetadata en korte bewijsfragmenten bij het advies, geen volledige kopieën van de lokale bestanden. Dit zelfstandige scherm genereert geen volledige PSA met AI en publiceert niets in Notion; daarvoor blijft de Python-app beschikbaar.
 
 De werkruimte heeft een donkere vormgeving met mintgroene accenten en een lokaal opgeslagen architectuurvisual. Het beeld in `assets/architecture-hero.png` is speciaal voor deze app gegenereerd: een illustratief model met vijf zwevende lagen, geen weergave van een vastgesteld ontwerp. De visual en stijlen worden zonder externe beeldservers geladen. De bronselectie, invoer en review blijven bedienbaar op desktop en telefoon. De groene knop in het beeld navigeert naar de bronselectie.
 
@@ -16,7 +16,37 @@ De vaste bronoptie **Enterprise architectuur Platform Dienstverlening** verwijst
 
 Met **Bron vernieuwen** haalt de app de actuele openbare tekst op. Een lokale momentopname wordt bewaard in de genegeerde map `.source-cache/`. De app toont ophaaldatum en bronkenmerk; het geselecteerde brondocument bevat de URL, de SHA-256 van de volledige tekst en de gekozen hoofdstukken. De momentopname is geen vastgezette officiële versie. Voor een eigen of historische versie kun je ook een PDF, DOCX, TXT of Markdown uploaden. De opgehaalde volledige bron wordt niet in deze Git-repository gepubliceerd.
 
-Andere broncategorieën zijn **Common Ground-kaders en principes**, **bestaande ADR’s** en **privacy- en beveiligingskaders**. Dit zijn uploadmogelijkheden, geen vooraf ingevulde of gevalideerde documenten. Daarnaast kun je projectopdrachten, requirements en andere projectdocumenten toevoegen en per bestand aan- of uitvinken.
+Andere broncategorieën zijn **Horizon Rotterdam**, **bestaande ADR’s** en **privacy- en beveiligingskaders**. Dit zijn uploadmogelijkheden, geen vooraf ingevulde of gevalideerde documenten. Daarnaast kun je projectopdrachten, requirements en andere projectdocumenten toevoegen en per bestand aan- of uitvinken.
+
+## Geadviseerd gebruik van ABB’s en SBB’s
+
+Tussen de enterprise architectuur en Horizon Rotterdam staat **Toe te passen bouwblokken**. De catalogus bevat de 34 ABB’s en 30 unieke SBB-labels uit het onderdeel *Solution Building Blocks (SBB’s) en mapping op ABB’s* in de enterprise architectuur. Namen, onderlinge mapping, bronregels, ophaaldatum en de SHA-256 van de bronmomentopname zijn vastgelegd in `assets/building-blocks.json`. Samengestelde of alternatieve SBB-labels uit de bron (bijvoorbeeld `Keycloak / Autorisatieservice`) blijven als zodanig herkenbaar: dit is geen keuze voor alle alternatieven tegelijk.
+
+Het scherm geeft **lokaal trefwoordadvies** op basis van projectnaam, afbakening en de daadwerkelijk geselecteerde documentinhoud. De adviesregels zijn heuristieken; het is geen semantische AI-analyse en er worden geen verplichte kaders bij verzonnen. De algemene enterprise-architectuurtekst wordt niet als projectvraag gebruikt, omdat deze anders ieder bouwblok relevant zou laten lijken.
+
+Bij een match worden de ABB en de bijbehorende SBB’s automatisch aangevinkt. De architect ziet de aanleiding, het bewijsfragment en de letterlijke bronmapping. Onderwerpwijzigingen en aan- of uitvinken van documenten werken door in het advies. Handmatige afwijkingen blijven behouden; **Volg automatisch advies** wist die afwijkingen. Overige catalogusbouwblokken zijn handmatig toe te voegen. Het advies blijft **te beoordelen**, geen vastgesteld architectuurbesluit.
+
+De HTML-versie leest PDF’s lokaal met de ingebedde PDF.js 6.4.299 en DOCX via de Word-XML. Hiervoor is een moderne browser nodig die module-workers en `DecompressionStream` ondersteunt. De PDF.js-download is gecontroleerd tegen de officiële SHA-512 uit de npm-pakketmetadata; versie, integriteit en Apache-2.0-licentie staan in `assets/vendor/pdfjs/`. De volledige licentie en beide PDF.js-modules zijn ook in het deelbare HTML-bestand opgenomen. Er is geen CDN nodig. Scans zonder tekst, wachtwoordbeveiliging, onleesbare bestanden en bestanden boven 20 MB worden duidelijk gemeld; wanneer de inhoud niet kan worden gelezen, wordt hooguit de bestandsnaam gebruikt, met een expliciete waarschuwing. PDF’s boven 300 pagina’s en tekst boven 1.000.000 tekens worden niet stilzwijgend afgekapt.
+
+In de Python-app wordt de gekozen bouwblokkenlijst met bronmapping als `Bouwblokkenadvies.md` toegevoegd aan de bronset voor conceptgeneratie. In het losse HTML-bestand staat het advies onder `building_blocks` in de gedownloade bronselectie. Daarin staan ook handmatige afwijkingen, bronkenmerken en eventuele leesproblemen. De JSON kan bewijsfragmenten uit je documenten bevatten: deel deze alleen met bevoegde personen.
+
+### Horizon Rotterdam
+
+De bronkaart verwijst naar de [door de gebruiker opgegeven Horizon Rotterdam-view](https://rotterdam.horizzon.cloud/sites/8579a6d6-9680-4fee-959c-4793130eef6f/views/e059f7c1-e164-f111-bb43-025a1dd2f359). Het klikken op deze link laadt de inhoud niet automatisch in de app. Voeg een PDF-, DOCX-, TXT- of Markdown-export toe om de tekst lokaal mee te wegen. Selecteer de Horizon-kaart en de bijbehorende bestanden; uitgevinkte Horizon-bronnen tellen niet mee.
+
+De Horizon-view kon in de ontwikkelomgeving niet worden uitgelezen: de netwerkproxy weigerde het domein met een 403. Dit bewijst niet dat de Horizon-pagina zelf een login vereist. De additionele Rotterdamse ABB/SBB-mapping en eventuele verplichtingen zijn daarom nog niet geverifieerd of aan de catalogus toegevoegd. Het huidige advies verwijst naar de enterprise-architectuurmapping; onbekende Rotterdamse oplossingen worden niet verzonnen. Domeintoegang is als conceptconfiguratie klaargezet voor beoordeling in de cloudomgevingsinstellingen.
+
+### Het deelbare bestand opnieuw bouwen
+
+De bewerkbare frontend staat in `web/`. Het rootbestand `index.html` wordt daaruit opgebouwd en bevat alle benodigde code en afbeeldingen:
+
+```bash
+python scripts/build_index.py
+```
+
+De broncatalogus bijwerken vanuit een bestaande bronmomentopname kan met `python scripts/update_building_catalogue.py`. Gebruik `--refresh` om eerst de actuele openbare bron op te halen. Bouw daarna `index.html` opnieuw. De trefwoordregels in `architect_agent/building_blocks.py` zijn lokale adviesregels en zijn gescheiden van de letterlijk overgenomen mapping.
+
+Getest: Python-tests, JavaScript/Python-pariteit en browserproeven met onderwerpwijzigingen, handmatige keuzes, TXT/Markdown-, PDF- en DOCX-inhoud, scans, uitvinken en de JSON-download. API-generatie en Notion-publicatie zijn bij deze wijziging niet uitgevoerd. Node.js is alleen nodig voor de optionele pariteitscontrole, niet om de app of het index-bestand te gebruiken.
 
 Onderaan staat de daadwerkelijke bronset met broncodes. Een geselecteerd kader zonder inhoud blokkeert generatie. **Download bronselectie** legt de keuze vast als JSON. **Maak concept-projectstartarchitectuur** gebruikt uitsluitend de gekozen bronnen, controleert lokaal de tekstlimiet en doet pas daarna een AI-aanroep. Bij een te grote bronset wordt niets stilzwijgend afgekapt. Het beoordeelbare concept is als JSON te downloaden; er wordt geen Word-document gemaakt of Notion-publicatie uitgevoerd door deze knop.
 

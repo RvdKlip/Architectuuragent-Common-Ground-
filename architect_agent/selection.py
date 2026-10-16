@@ -4,6 +4,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+HORIZON_URL = 'https://rotterdam.horizzon.cloud/sites/8579a6d6-9680-4fee-959c-4793130eef6f/views/e059f7c1-e164-f111-bb43-025a1dd2f359'
+
 
 @dataclass(frozen=True)
 class SourceOption:
@@ -17,9 +19,9 @@ SOURCE_OPTIONS = (
     SourceOption('enterprise', 'Enterprise architectuur Platform Dienstverlening',
                  'Het overkoepelende architectuurkader voor het platform.',
                  'Kaders, doelarchitectuur en samenhang met het platform.'),
-    SourceOption('common_ground', 'Common Ground-kaders en principes',
-                 'Voeg de voor dit project geldende kaders en principes toe.',
-                 'Toetsing van lagen, gegevens bij de bron en API-afspraken.'),
+    SourceOption('horizon', 'Horizon Rotterdam',
+                 'Voeg de Rotterdamse kaders, bouwstenen en oplossingen uit Horizon toe.',
+                 'Rotterdamse bouwblokken en solutions toetsen aan de aangeleverde Horizon-bron.'),
     SourceOption('adrs', 'Bestaande architectuurbesluiten (ADR’s)',
                  'Selecteer de vastgestelde besluiten die dit project raken.',
                  'Bestaande besluiten en hun status expliciet meenemen.'),
