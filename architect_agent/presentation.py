@@ -20,7 +20,7 @@ def render_hero():
   <div class="hero-copy">
     <h2>Een sterk begin.<br><span>Een helder ontwerp.</span></h2>
     <p>Van projectambitie naar een onderbouwde architectuur.<br>Kies je bronnen. Leg je fundament.</p>
-    <a class="hero-action" href="#generate-psa" target="_self">Genereer PA <span aria-hidden="true">↗</span></a>
+    <a class="hero-action" href="#generate-psa" target="_self">Genereer de architectuur <span aria-hidden="true">↗</span></a>
   </div>
   <div class="hero-footer"><span><span class="live-dot"></span> Vijf lagen. Eén samenhangend fundament.</span><span class="concept-label">CONCEPTVISUAL</span></div>
 </section>

@@ -125,13 +125,13 @@ def test_pa_screen_generates_from_all_chapters(snapshot, plan, tmp_path):
         generate.assert_not_called()
         at.text_input(key='project_name').set_value('Nieuw dienstverleningsproject')
         at.text_area(key='project_goals').set_value('Maak dienstverlening toegankelijker.').run()
-        button = next(b for b in at.button if b.label == 'Genereer PA')
+        button = next(b for b in at.button if b.label == 'Genereer de architectuur')
         assert not button.disabled
         # Een geselecteerd kader zonder inhoud blokkeert generatie.
         at.checkbox(key='use_horizon').check().run()
-        assert next(b for b in at.button if b.label == 'Genereer PA').disabled
+        assert next(b for b in at.button if b.label == 'Genereer de architectuur').disabled
         at.checkbox(key='use_horizon').uncheck().run()
-        next(b for b in at.button if b.label == 'Genereer PA').click().run()
+        next(b for b in at.button if b.label == 'Genereer de architectuur').click().run()
         assert not at.exception
         assert generate.call_count == 1
         assert generate.call_args.kwargs == {'project_start': True}
@@ -151,4 +151,4 @@ def test_enterprise_deselection_excludes_source(snapshot, tmp_path):
         assert not at.exception
         assert at.metric[0].value == '0'
         assert not at.dataframe
-        assert next(b for b in at.button if b.label == 'Genereer PA').disabled
+        assert next(b for b in at.button if b.label == 'Genereer de architectuur').disabled

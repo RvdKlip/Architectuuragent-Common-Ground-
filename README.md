@@ -1,5 +1,23 @@
 # Common Ground Architectuuragent
 
+## Epicselectie en delen via Teams
+
+De primaire knop heet **Genereer de architectuur**. In stap 1 kies je een epic uit **Notion** of voeg je een **willekeurige Microsoft Teams-link** met naam en beschrijving toe. Zonder beschrijving wordt alleen een verwijzing als bron opgenomen, met de expliciete melding dat de inhoud niet is ingelezen. De geselecteerde epic staat zichtbaar in het scherm, wordt als afzonderlijke bron `Geselecteerde-epic.md` opgenomen en kan worden verwijderd. Een wijziging maakt een eerder gegenereerd concept verouderd. Er worden geen epicgegevens of sleutels opgeslagen in de gedeelde appbestanden.
+
+Voor Notion is de [opgegeven epiclijst](https://app.notion.com/p/platformvoordienstverlening/e9375da1960249bba23c49d038d3c888?v=2b078b5f4db4808da728000c21a96e11) de bron. Stel `NOTION_TOKEN` op de lokale service in en deel de database met die integratie. `NOTION_EPICS_DATABASE_ID` gebruikt standaard `e9375da1-9602-49bb-a23c-49d038d3c888`. Als de opgegeven link een bovenliggende pagina is, moet je hier het echte database-ID invullen. De viewparameter is een Notion-weergave, geen API-filter; de keuzelijst bevat items uit de ingestelde database en toont vervolgpagina’s met **Meer epics laden**. De inhoud wordt pas gelezen nadat een epic is gekozen. De koppeling leest titels, tekst-/statusvelden, tekstblokken en tabellen; afbeeldingen, gekoppelde pagina’s en bestanden worden gemarkeerd als niet ingelezen. De bron is hier niet live geverifieerd: er is geen ingestelde Notion-integratiesleutel.
+
+Start `publication_service.py` lokaal en vul URL en service-sleutel in onder **Notion-koppeling instellen**. De authenticated routes `/epics/list` en `/epics/get` lezen alleen de ingestelde database; zij publiceren niets. Teams-links worden niet automatisch via Microsoft Graph geopend of uitgelezen. Plak zelf de beschrijving, of voeg een projectdocument toe. De Streamlit-app biedt dezelfde epicselectie; de Notion-sleutel staat daar onder AI-/publicatie-instellingen in de zijbalk.
+
+### Een index voor collega’s
+
+- `index.html` in de repository en ZIP is de zelfstandige app.
+- `downloads/index.html` is een klein startbestand dat naar de actuele GitHub Pages-site verwijst. In de ZIP heet dit `Open-Architectuuragent-online.html`.
+- Voor direct openen vanuit Teams kun je na activatie de website-link delen: `https://rvdklip.github.io/Architectuuragent-Common-Ground-/`.
+
+**GitHub Pages moet eenmalig worden ingeschakeld**: open de [repository-instellingen voor Pages](https://github.com/RvdKlip/Architectuuragent-Common-Ground-/settings/pages), kies **Deploy from a branch**, **main**, **/ (root)** en **Save**. De repository heeft `.nojekyll`; er is geen serverinstallatie nodig voor het appscherm. Het activeren kon vanuit deze omgeving niet worden uitgevoerd: de GitHub API wees de beschikbare toegang af. De website-URL is daarom een voorbereid adres, geen bevestigde live publicatie. Een raw GitHub-HTML-link is geen website. Teams kan een HTML-bijlage alleen als voorvertoning tonen of blokkeren; download/open in een browser of deel de Pages-link nadat de site beschikbaar is.
+
+Bouw beide bestanden en de ZIP met `.venv/bin/python scripts/package_app.py`. De ZIP bevat geen lokale uploads, privé-epics of serviceconfiguratie. De browserproef gebruikt gemockte Notion-epics en een synthetische Teams-link; er worden geen echte epics gelezen, AI-aanroepen gedaan of platformpagina’s gepubliceerd.
+
 ## Projectarchitectuur: vernieuwd appscherm
 
 Open `index.html` door erop te dubbelklikken na het uitpakken van de ZIP. Het bestand bevat alle afbeeldingen, stijlen, de PDF-lezer en PDF-generator; er is geen installatie nodig. De werkruimte heet **Architectuuragent**, toont het gemeentelogo van Rotterdam en gebruikt Rotterdam-groen `#00811F`. Het originele logo en de bijbehorende rechtenverklaring staan in `assets/rotterdam/`.
@@ -30,7 +48,7 @@ Objecten zonder expliciete ABB/SBB-classificatie, ID of naam worden overgeslagen
 
 ### Generatie, huisstijl en publicatie
 
-**Genereer PA** opent de keuze **Rotterdam / Common Ground** en **PDF / Confluence / Notion** (meerdere mogelijk). Het losse bestand maakt standaard lokaal een eerste brongebaseerd concept: herkenbare bronfragmenten, geselecteerde bouwstenen, concept-ADR en open besluiten. Dit is geen semantische AI-synthese of vastgesteld ontwerp. PDF en HTML gebruiken de gekozen kleuren en typografie. Notion ondersteunt alleen platformkleuren, Confluence behoudt het thema van de doelruimte. De uitvoerprofielen zijn geen gecertificeerde officiële documenttemplates.
+**Genereer de architectuur** opent de keuze **Rotterdam / Common Ground** en **PDF / Confluence / Notion** (meerdere mogelijk). Het losse bestand maakt standaard lokaal een eerste brongebaseerd concept: herkenbare bronfragmenten, geselecteerde bouwstenen, concept-ADR en open besluiten. Dit is geen semantische AI-synthese of vastgesteld ontwerp. PDF en HTML gebruiken de gekozen kleuren en typografie. Notion ondersteunt alleen platformkleuren, Confluence behoudt het thema van de doelruimte. De uitvoerprofielen zijn geen gecertificeerde officiële documenttemplates.
 
 Optioneel: open AI-synthese in het generatievenster. Stel `OPENAI_API_KEY` veilig in op de lokale service, `OPENAI_MODEL` is optioneel. Vink expliciet aan dat de geselecteerde bronnen gedeeld mogen worden. Alleen na een klik op genereren gaan volledige geselecteerde bronteksten naar de bestaande AI-workflow. De gedeelde index bevat geen sleutels. De bronlimiet is verhoogd tot **900.000 tekens** om de volledige enterprise architectuur (circa 388.000 tekens) en aanvullende bronnen te ondersteunen. Grotere sets geven een fout; niets wordt automatisch afgekapt. Gebruik een model met voldoende contextcapaciteit; de service garandeert geen capaciteit van een zelf ingesteld ander model.
 

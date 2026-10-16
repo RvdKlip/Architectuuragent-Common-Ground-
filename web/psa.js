@@ -5,7 +5,7 @@ const PA = (() => {
   const escape = text => String(text).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   function signature() {
     return JSON.stringify({project:$('project-name').value,goals:$('project-goals').value,type:$('project-type').value,
-      documents:selectedDocuments(), chapters:[...remote.selected], blocks:buildingBlocks.selected,
+      epic:Epic.current, documents:selectedDocuments(), chapters:[...remote.selected], blocks:buildingBlocks.selected,
       files:Object.values(files).flat().map(entry=>({name:entry.file.name,size:entry.file.size,modified:entry.file.lastModified,selected:entry.selected}))});
   }
   function stale() { return !!current && current.signature !== signature(); }
@@ -28,12 +28,13 @@ const PA = (() => {
     const missing=[...document.querySelectorAll('.source-toggle:checked')].map(input=>input.dataset.category).filter(category=>!selectedDocuments().some(doc=>doc.category===category));
     if(missing.length) throw Error('Voeg eerst inhoud toe voor: '+missing.map(category=>categories[category]).join(', '));
 
-    if(sources.length>98) throw Error('Selecteer maximaal 98 bronbestanden voor één PA.');
+    if(sources.length>97) throw Error('Selecteer maximaal 97 bronbestanden voor één PA.');
     if(buildingBlocks.selected.length) {
       const lines=buildingBlocks.selected.map(block=>block.type+': '+block.name+'\n'+('Object-ID: '+block.id+'\n'+block.description));
       const text='Geselecteerde Rotterdamse bouwstenen — VOORSTEL, te beoordelen.\nBroncatalogus: '+catalogue.source.url+'\nExport: '+horizon.filename+'\nSHA-256: '+catalogue.source.sha256+'\n'+lines.join('\n\n');
       sources.push({filename:'Bouwstenen-Rotterdam-selectie.md',pages:1,text,contexts:[{source:'Bouwstenen-Rotterdam-selectie.md',text}]});
     }
+    const epic=Epic.document();if(epic)sources.push({...epic,contexts:[{source:epic.filename,text:epic.text}]});
     if(!sources.length)throw Error('Selecteer minstens één leesbare bron.');
     return sources.map((source,index)=>({...source,key:'B'+String(index).padStart(2,'0')}));
   }

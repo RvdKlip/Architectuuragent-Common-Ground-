@@ -16,6 +16,7 @@ from architect_agent.output import house_style
 from architect_agent.notion import publish_plan as notion_publish
 from architect_agent.confluence import publish_plan as confluence_publish
 from architect_agent.ai import generate_plan
+from architect_agent.epics import list_epics, get_epic
 
 
 def generate(payload, environment):
@@ -86,7 +87,7 @@ def make_handler(environment):
 
         def origin_allowed(self):
             origin = self.headers.get('Origin')
-            return origin in (None, 'null', 'http://127.0.0.1:8501', 'http://localhost:8501')
+            return origin in (None, 'null', 'http://127.0.0.1:8501', 'http://localhost:8501', 'https://rvdklip.github.io')
 
         def answer(self, status, data):
             self.send_response(status)
@@ -107,13 +108,24 @@ def make_handler(environment):
             authorization = self.headers.get('Authorization','')
             if not self.origin_allowed() or not hmac.compare_digest(authorization, 'Bearer '+token):
                 return self.answer(403, {'error':'Geen toegang tot de publicatieservice.'})
-            if self.path not in ('/publish','/generate'):
+            if self.path not in ('/publish','/generate','/epics/list','/epics/get'):
                 return self.answer(404, {'error':'Onbekend endpoint.'})
             try:
                 length = int(self.headers.get('Content-Length','0'))
                 if not 0 < length <= 8000000:
                     raise ValueError('Ongeldige of te grote publicatieaanvraag.')
                 payload = json.loads(self.rfile.read(length))
+                if self.path.startswith('/epics/'):
+                    try:
+                        if self.path == '/epics/list':
+                            result = list_epics(payload.get('provider'), environment, payload.get('cursor'))
+                        else:
+                            result = get_epic(payload.get('provider'), payload.get('id'), environment)
+                        return self.answer(200, result)
+                    except ValueError as error:
+                        return self.answer(400, {'error':str(error)})
+                    except Exception:
+                        return self.answer(502, {'error':'Epic ophalen is niet gelukt. Controleer de Notion-bron en integratierechten.'})
                 if self.path == '/generate':
                     try:
                         result = generate(payload, environment)

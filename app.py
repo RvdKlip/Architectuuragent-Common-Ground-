@@ -39,7 +39,7 @@ with st.sidebar:
         confluence_parent=st.text_input('Confluence bovenliggende pagina-ID (optioneel)',value=os.getenv('CONFLUENCE_PARENT_ID',''))
     st.markdown('<div class="workspace-note"><strong>Ontworpen voor onderbouwing.</strong>Van enterprise architectuur tot projectopdracht. Jij kiest de bronnen en beoordeelt het concept.</div>',unsafe_allow_html=True)
 
-selection=render_selection()
+selection=render_selection(notion_token)
 base=selection['base']
 documents=selection['documents']
 scope=selection['scope']
@@ -83,7 +83,7 @@ if st.button('Laad bestaand concept',disabled=not (review_upload and selection_r
 can_generate=selection_ready and budget_ok and bool(scope.strip()) and bool(goals.strip()) and (selection['project_start'] or base is not None) and any([output_pdf,output_confluence,output_notion])
 if not scope.strip() or not goals.strip():
     st.info('Vul een projectnaam en doel/afbakening in om een concept te maken.')
-if st.button('Genereer PA' if selection['project_start'] else 'Genereer concept-update',type='primary',disabled=not can_generate,key='generate_psa'):
+if st.button('Genereer de architectuur' if selection['project_start'] else 'Genereer concept-update',type='primary',disabled=not can_generate,key='generate_psa'):
     try:
         if api_key: os.environ['OPENAI_API_KEY']=api_key
         root=Path(tempfile.mkdtemp(prefix='cg_architectuur_'))

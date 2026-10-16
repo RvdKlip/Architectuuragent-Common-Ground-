@@ -6,9 +6,10 @@ from .catalogue import CACHE, ENTERPRISE_GITHUB, ENTERPRISE_GITBOOK, load_enterp
 from .selection import HORIZON_URL, SOURCE_OPTIONS, SelectedDocument, missing_sources
 from .presentation import render_hero, render_steps
 from .horizzon import parse_export
+from .epics_ui import render_epic
 
 
-def render_selection() -> dict:
+def render_selection(notion_token="") -> dict:
     st.title('Projectarchitectuur')
     st.caption('Jouw project. Jouw bronnen. Eén helder vertrekpunt.')
     render_hero()
@@ -22,6 +23,7 @@ def render_selection() -> dict:
         with right:
             mode = st.selectbox('Type architectuur', ['Nieuwe projectarchitectuur', 'Bestaande architectuur bijwerken'])
         goals = st.text_area('Doel en afbakening', key='project_goals', height=100)
+        epic_source, epic = render_epic(notion_token)
     project_start = mode == 'Nieuwe projectarchitectuur'
     base = None if project_start else st.file_uploader('Bestaande solutionarchitectuur (Word)', type=['docx'], key='base')
     st.markdown('<div id="bronnen"></div>', unsafe_allow_html=True)
@@ -92,6 +94,8 @@ def render_selection() -> dict:
             digest = hashlib.sha256(file.getvalue()).hexdigest()[:16]
             if st.checkbox(file.name, value=True, key=f'extra_{index}_{digest}'):
                 documents.append(SelectedDocument('project', file.name, file.getvalue()))
+    if epic_source:
+        documents.append(epic_source)
     missing = missing_sources(selected, documents)
     st.subheader('Jouw bronselectie')
     a, b, c = st.columns(3)
@@ -100,6 +104,7 @@ def render_selection() -> dict:
     c.metric('Nog aan te vullen', len(missing))
     rows = [{'Broncode': 'B00', 'Bron': base.name, 'Categorie': 'Bestaande architectuur'}] if base else []
     titles = {o.key: o.title for o in SOURCE_OPTIONS}
+    titles['epic'] = 'Geselecteerde epic'
     for index, document in enumerate(documents, int(base is not None)):
         rows.append({'Broncode': f'B{index:02d}', 'Bron': document.name, 'Categorie': titles.get(document.category, 'Projectdocument')})
     if rows:
@@ -107,7 +112,7 @@ def render_selection() -> dict:
     if missing:
         st.warning('Nog inhoud nodig voor: ' + '; '.join(missing))
     manifest = {'project': scope, 'goals': goals, 'type': mode, 'sources': rows, 'missing': missing,
-                'enterprise_architecture': enterprise_metadata, 'building_blocks': building_blocks,
+                'epic': epic, 'enterprise_architecture': enterprise_metadata, 'building_blocks': building_blocks,
                 'horizon': {'url': HORIZON_URL, 'content_loaded': bool(building_blocks['selected'])}}
     st.download_button('Download bronselectie', json.dumps(manifest, ensure_ascii=False, indent=2), file_name='bronselectie.json', mime='application/json')
     return {'project_start': project_start, 'scope': scope, 'goals': goals, 'base': base, 'documents': documents, 'missing': missing, 'manifest': manifest}
