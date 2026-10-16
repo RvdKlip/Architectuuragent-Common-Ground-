@@ -9,13 +9,16 @@ from .catalogue import (
     chapter_document, chapters, load_enterprise,
 )
 from .selection import SOURCE_OPTIONS, SelectedDocument, missing_sources
+from .presentation import render_hero, render_steps
 
 
 def render_selection() -> dict:
     st.title('Projectstartarchitectuur')
-    st.caption('Stel je project samen. Kies de kaders en documenten die de architectuur moeten onderbouwen.')
-    st.markdown('**1 · Project**　 →　 **2 · Bronnen selecteren**　 →　 **3 · Concept beoordelen**')
-    with st.container(border=True):
+    st.caption('Jouw project. Jouw bronnen. Eén helder vertrekpunt.')
+    render_hero()
+    render_steps()
+    st.markdown('<div id="project"></div>', unsafe_allow_html=True)
+    with st.container(border=True, key='project_card'):
         st.subheader('1. Welk project start je?')
         left, right = st.columns([2, 1])
         with left:
@@ -28,14 +31,15 @@ def render_selection() -> dict:
     if not project_start:
         base = st.file_uploader('Bestaande solutionarchitectuur (Word)', type=['docx'], key='base')
 
-    st.subheader('2. Selecteer je bronnen')
+    st.markdown('<div id="bronnen"></div>', unsafe_allow_html=True)
+    st.subheader('2. Bouw je fundament')
     st.write('De enterprise architectuur staat voor je klaar. Vul deze naar behoefte aan met projectdocumenten en andere kaders.')
     documents = []
     selected = []
     enterprise_metadata = None
     columns = st.columns(2)
     for index, option in enumerate(SOURCE_OPTIONS):
-        with columns[index % 2], st.container(border=True):
+        with columns[index % 2], st.container(border=True, key='source_'+option.key):
             enabled = st.checkbox(option.title, value=option.key == 'enterprise', key='use_'+option.key)
             st.caption(option.description)
             if enabled:

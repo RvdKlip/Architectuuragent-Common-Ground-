@@ -1,5 +1,7 @@
 # Common Ground Architectuuragent
 
+De werkruimte heeft een donkere vormgeving met mintgroene accenten en een lokaal opgeslagen architectuurvisual. Het beeld in `assets/architecture-hero.png` is speciaal voor deze app gegenereerd: een illustratief model met vijf zwevende lagen, geen weergave van een vastgesteld ontwerp. De visual en stijlen worden zonder externe beeldservers geladen. De bronselectie, invoer en review blijven bedienbaar op desktop en telefoon. De groene knop in het beeld navigeert naar de bronselectie.
+
 ## Projectstartarchitectuur: project en bronnen kiezen
 
 Het beginscherm laat een architect een **nieuwe projectstartarchitectuur (PSA)** samenstellen. Vul de projectnaam en het doel/de afbakening in en selecteer welke bronnen moeten worden meegenomen. Voor een nieuwe PSA is geen bestaand Word-document nodig. De bestaande workflow blijft beschikbaar via **Type architectuur → Bestaande architectuur bijwerken**.

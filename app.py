@@ -14,25 +14,23 @@ from architect_agent.notion import publish_plan, NotionPublishError
 from architect_agent.sources import collect
 from architect_agent.selection import write_documents
 from architect_agent.selection_ui import render_selection
+from architect_agent.presentation import apply_style
 
 st.set_page_config(page_title='Projectstartarchitectuur · Common Ground',page_icon='🏛️',layout='wide')
+apply_style()
 
 with st.sidebar:
-    st.markdown('### Common Ground')
-    st.caption('Architectuuragent · werkruimte voor de architect')
-    st.divider()
-    st.markdown('**Projectstartarchitectuur**')
-    st.caption('Project → bronselectie → concept → review')
-    st.divider()
-    st.header('Modelinstellingen')
-    model=st.text_input('OpenAI-model',os.getenv('OPENAI_MODEL','gpt-4.1'))
-    api_key=st.text_input('OPENAI_API_KEY (optioneel)',type='password',help='Of stel de sleutel in als omgevingsvariabele. Wordt niet in outputbestanden bewaard.')
-    st.info('Een API-aanroep is optioneel bij hergebruik van beoordeelde JSON. API-gebruik kan kosten veroorzaken.')
-    st.warning('Gebruik alleen bronstukken die volgens het gemeentelijke informatiebeveiligingsbeleid naar de gekozen AI-dienst mogen. Bronbestanden worden bij genereren aan de API doorgegeven.')
+    st.markdown('''<div class="sidebar-brand"><span class="brand-monogram">CG</span><div><strong>Common Ground</strong><small>ARCHITECT WORKSPACE</small></div></div>
+<nav class="workspace-nav" aria-label="Werkruimte"><a href="#project" target="_self"><span>◈</span> Projectstartarchitectuur</a><a href="#bronnen" target="_self"><span>▤</span> Bronselectie</a><a href="#concept" target="_self"><span>◇</span> Concept & review</a></nav>''',unsafe_allow_html=True)
+    with st.expander('AI-instellingen'):
+        model=st.text_input('OpenAI-model',os.getenv('OPENAI_MODEL','gpt-4.1'))
+        api_key=st.text_input('OPENAI_API_KEY (optioneel)',type='password',help='Of stel de sleutel in als omgevingsvariabele. Wordt niet in outputbestanden bewaard.')
+        st.caption('AI-analyse kan kosten veroorzaken. Gebruik uitsluitend bronnen die naar deze AI-dienst mogen worden verzonden.')
     with st.expander('Notion · later instellen'):
         notion_token=st.text_input('Notion-integratiesleutel',type='password',value=os.getenv('NOTION_TOKEN',''),help='Geef de integratie toegang tot de bovenliggende pagina. Bewaar deze sleutel niet in Git.')
         notion_parent=st.text_input('Bovenliggende Notion-pagina (link of ID)',value=os.getenv('NOTION_PARENT_PAGE_ID',''))
         st.caption('Publiceren gebeurt uitsluitend via een expliciete publicatieactie na review.')
+    st.markdown('<div class="workspace-note"><strong>Ontworpen voor onderbouwing.</strong>Van enterprise architectuur tot projectopdracht. Jij kiest de bronnen en beoordeelt het concept.</div>',unsafe_allow_html=True)
 
 selection=render_selection()
 base=selection['base']
@@ -42,6 +40,7 @@ goals=selection['goals']
 selection_ready=bool(documents) and not selection['missing']
 budget_ok=(not selection['manifest']['enterprise_architecture']
            or len(documents[0].content.decode('utf-8'))<=155000)
+st.markdown('<div id="concept"></div>',unsafe_allow_html=True)
 st.subheader('3. Maak een concept ter review')
 st.caption('De bronselectie wordt eerst lokaal gecontroleerd. Alleen als je op de analyseknop klikt, worden de geselecteerde bronteksten naar het ingestelde AI-model verstuurd.')
 
