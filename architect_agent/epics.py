@@ -139,3 +139,75 @@ def validate_epic_link(value, provider):
     if uri.scheme != 'https' or not valid or uri.username or uri.password or uri.port:
         raise ValueError('Gebruik een geldige HTTPS-link naar de gekozen epicbron.')
     return value.strip()
+
+
+def resolve_epic_link(value, env):
+    """Resolve only validated platform links through authenticated read APIs."""
+    import re
+    from urllib.parse import parse_qs, unquote
+    uri = urlparse(value.strip())
+    host = (uri.hostname or '').lower()
+    provider = 'notion' if any(host == base or host.endswith('.'+base) for base in ('app.notion.com', 'notion.so', 'notion.site')) else 'teams'
+    link = validate_epic_link(value, provider)
+    if provider == 'notion':
+        match = re.search(r'([0-9a-fA-F]{32}|[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12})$', uri.path.rstrip('/'))
+        if not match:
+            raise ValueError('Gebruik de link naar een afzonderlijke Notion-epic, niet de database of weergave.')
+        epic = get_epic('notion', str(UUID(match[1])), env)
+    else:
+        token = env.get('MICROSOFT_GRAPH_TOKEN', '')
+        if not token or '\r' in token or '\n' in token:
+            raise ValueError('Teams ophalen vereist MICROSOFT_GRAPH_TOKEN op de lokale service met leesrechten voor het bericht.')
+        parts = uri.path.strip('/').split('/')
+        if len(parts) != 4 or parts[:2] != ['l', 'message']:
+            raise ValueError('Gebruik een Teams-link naar een specifiek bericht; kanaal-, vergader- en app-links bevatten geen epicbeschrijving.')
+        thread, message = unquote(parts[2]), unquote(parts[3])
+        query = parse_qs(uri.query)
+        if not message.isdigit():
+            raise ValueError('De Teams-link bevat geen geldig bericht-ID.')
+        team = query.get('groupId', [''])[0]
+        parent = query.get('parentMessageId', [''])[0]
+        if team:
+            team = str(UUID(team))
+            path = 'teams/'+team+'/channels/'+quote(thread, safe='')+'/messages/'
+            if parent and parent != message:
+                if not parent.isdigit():
+                    raise ValueError('Ongeldig bovenliggend Teams-bericht.')
+                path += parent+'/replies/'+message
+            else:
+                path += message
+        else:
+            path = 'chats/'+quote(thread, safe='')+'/messages/'+message
+        request = Request('https://graph.microsoft.com/v1.0/'+path, headers={'Authorization':'Bearer '+token})
+        try:
+            with urlopen(request, timeout=30) as response:
+                raw = response.read(5_000_001)
+            if len(raw) > 5_000_000:
+                raise ValueError('Het Teams-bericht is te groot.')
+            data = json.loads(raw)
+        except (HTTPError, URLError, OSError, TimeoutError):
+            raise ValueError('Teams-bericht niet opgehaald. Controleer de link, Microsoft Graph-toegang en leesrechten.') from None
+        body = data.get('body', {})
+        text = body.get('content', '')
+        if body.get('contentType') == 'html':
+            from html.parser import HTMLParser
+            class TextReader(HTMLParser):
+                def __init__(self):
+                    super().__init__(); self.parts = []
+                def handle_data(self, data):
+                    self.parts.append(data)
+                def handle_starttag(self, tag, attrs):
+                    if tag in ('br', 'p', 'div', 'li'):
+                        self.parts.append('\n')
+                def handle_endtag(self, tag):
+                    if tag in ('p', 'div', 'li'):
+                        self.parts.append('\n')
+            reader = TextReader(); reader.feed(text)
+            text = '\n'.join(line.strip() for line in ''.join(reader.parts).splitlines() if line.strip())
+        title = (data.get('subject') or '').strip() or next((line.strip() for line in text.splitlines() if line.strip()), '')
+        epic = {'provider':'teams', 'id':data.get('id', message), 'url':link, 'title':title, 'text':text}
+    if not epic['title'].strip() or not epic['text'].strip():
+        raise ValueError('De epic bevat geen leesbare naam of beschrijving. Er is geen epic geselecteerd.')
+    if len(epic['text']) > 250000:
+        raise ValueError('De epicbeschrijving is te groot; er wordt niets afgekapt.')
+    return {**epic, 'url':link, 'mode':'connector'}

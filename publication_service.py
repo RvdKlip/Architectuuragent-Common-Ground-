@@ -16,7 +16,7 @@ from architect_agent.output import house_style
 from architect_agent.notion import publish_plan as notion_publish
 from architect_agent.confluence import publish_plan as confluence_publish
 from architect_agent.ai import generate_plan
-from architect_agent.epics import list_epics, get_epic
+from architect_agent.epics import list_epics, get_epic, resolve_epic_link
 
 
 def generate(payload, environment):
@@ -120,12 +120,12 @@ def make_handler(environment):
                         if self.path == '/epics/list':
                             result = list_epics(payload.get('provider'), environment, payload.get('cursor'))
                         else:
-                            result = get_epic(payload.get('provider'), payload.get('id'), environment)
+                            result = resolve_epic_link(payload['url'], environment) if 'url' in payload else get_epic(payload.get('provider'), payload.get('id'), environment)
                         return self.answer(200, result)
                     except ValueError as error:
                         return self.answer(400, {'error':str(error)})
                     except Exception:
-                        return self.answer(502, {'error':'Epic ophalen is niet gelukt. Controleer de Notion-bron en integratierechten.'})
+                        return self.answer(502, {'error':'Epic ophalen is niet gelukt. Controleer de epicbron en integratierechten.'})
                 if self.path == '/generate':
                     try:
                         result = generate(payload, environment)

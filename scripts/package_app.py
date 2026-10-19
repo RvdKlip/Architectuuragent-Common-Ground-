@@ -18,11 +18,9 @@ def package():
 Gebruik Genereer de architectuur om een brongebaseerd concept te maken.
 Alle hoofdstukken van de enterprise architectuur gaan mee.
 
-Epics: kies Notion of Microsoft Teams in stap 1.
-- Notion: haal epics op via de ingestelde lokale service, of voeg een eigen epiclink toe.
-- Teams: plak een willekeurige Teams-link, geef de epic een naam en voeg de beschrijving toe.
-Een link alleen geeft geen leesrechten: zonder beschrijving wordt alleen de verwijzing gebruikt.
-De geselecteerde epic wordt als bron opgenomen en kan weer worden verwijderd.
+Epics: plak een Notion-epiclink of Teams-berichtlink en klik Epic ophalen.
+Naam en beschrijving worden via de lokale service opgehaald.
+Stel daarvoor de platformtoegang en service-sleutel in; zonder toegang volgt een foutmelding.
 
 Voor Notion-lezen, AI en publicatie is een lokaal ingestelde koppeling nodig.
 Er zitten geen sleutels of privé-epics in dit bestand. Zie de repository-README:

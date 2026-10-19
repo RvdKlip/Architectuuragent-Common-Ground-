@@ -65,16 +65,47 @@ def test_teams_link_validation(url):
     with pytest.raises(ValueError):validate_epic_link(url,'teams')
 
 
-def test_streamlit_teams_link_is_a_selected_source_and_can_be_removed():
-    at = AppTest.from_file(str(Path(__file__).parents[1]/'app.py')).run(timeout=30)
-    at.selectbox(key='epic_provider').set_value('teams').run()
-    at.text_input(key='epic_link_teams').set_value('https://teams.microsoft.com/l/message/test/123')
-    at.text_input(key='epic_title_teams').set_value('Testepic uit Teams')
-    at.text_area(key='epic_description_teams').set_value('Een synthetische epicbeschrijving voor een broncontrole.').run()
-    next(button for button in at.button if button.label=='Gebruik deze epic').click().run()
-    assert not at.exception
-    assert at.session_state['selected_epic']['provider'] == 'teams'
-    assert any('Geselecteerde-epic.md' in frame.value['Bron'].tolist() for frame in at.dataframe)
-    next(button for button in at.button if button.label=='Epic verwijderen').click().run()
-    assert not at.exception
-    assert not any('Geselecteerde-epic.md' in frame.value['Bron'].tolist() for frame in at.dataframe)
+def test_streamlit_link_resolves_details_and_invalidates_on_change():
+    epic = {'provider':'teams','id':'123','url':'https://teams.microsoft.com/l/message/test/123',
+            'title':'Testepic', 'text':'Gelezen beschrijving', 'mode':'connector'}
+    with patch('architect_agent.epics_ui.resolve_epic_link', return_value=epic) as resolve:
+        at = AppTest.from_file(str(Path(__file__).parents[1]/'app.py')).run(timeout=30)
+        assert not any(s.label == 'Bron van de epic' for s in at.selectbox)
+        at.text_input(key='epic_link').set_value(epic['url']).run()
+        next(b for b in at.button if b.label == 'Epic ophalen').click().run()
+        assert not at.exception
+        assert at.session_state['selected_epic']['text'] == epic['text']
+        assert any(i.value == epic['title'] and i.disabled for i in at.text_input)
+        resolve.assert_called_once()
+        at.text_input(key='epic_link').set_value('https://teams.microsoft.com/l/message/other/456').run()
+        assert not any('Geselecteerde-epic.md' in frame.value['Bron'].tolist() for frame in at.dataframe)
+
+
+def test_resolve_notion_link_uses_page_id():
+    from architect_agent.epics import resolve_epic_link
+    with patch('architect_agent.epics.get_epic', return_value={'title':'Epic', 'text':'Beschrijving'}) as get:
+        result = resolve_epic_link('https://www.notion.so/Epic-'+PAGE.replace('-', ''), ENV)
+    assert get.call_args.args == ('notion', PAGE, ENV)
+    assert result['text'] == 'Beschrijving'
+
+
+def test_resolve_teams_message_reads_graph_and_extracts_html():
+    from architect_agent.epics import resolve_epic_link
+    from unittest.mock import MagicMock
+    response = MagicMock()
+    response.__enter__.return_value.read.return_value = json.dumps({'id':'123','subject':'Epicnaam','body':{'contentType':'html','content':'<p>Eerste alinea</p><p>Tweede &amp; derde</p>'}}).encode()
+    url = 'https://teams.microsoft.com/l/message/19%3Atest%40thread.tacv2/123?groupId='+PAGE
+    with patch('architect_agent.epics.urlopen', return_value=response) as request:
+        epic = resolve_epic_link(url, {'MICROSOFT_GRAPH_TOKEN':'test-only'})
+    assert epic['title'] == 'Epicnaam'
+    assert epic['text'] == 'Eerste alinea\nTweede & derde'
+    assert request.call_args.args[0].full_url.startswith('https://graph.microsoft.com/v1.0/teams/'+PAGE+'/channels/')
+
+
+@pytest.mark.parametrize('url', ['https://evil.example/a','http://teams.microsoft.com/a','https://teams.microsoft.com/l/meetup-join/test'])
+def test_resolver_rejects_unsupported_links_without_network(url):
+    from architect_agent.epics import resolve_epic_link
+    with patch('architect_agent.epics.urlopen') as request:
+        with pytest.raises(ValueError):
+            resolve_epic_link(url, {'MICROSOFT_GRAPH_TOKEN':'test-only'})
+        request.assert_not_called()
