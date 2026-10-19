@@ -23,11 +23,15 @@ def render_selection() -> dict:
         st.subheader('Projectdocumenten en overige bronnen')
         st.caption('Voeg één of meerdere PDF-, DOCX-, TXT- of Markdown-bestanden toe. Vink per bestand aan of het mee moet.')
         extra = st.file_uploader('Projectbronnen uploaden', type=['pdf', 'docx', 'txt', 'md'], accept_multiple_files=True, key='project_sources')
+        retained = st.session_state.setdefault('retained_project_sources', {})
+        for file in extra or []:
+            content = file.getvalue()
+            digest = hashlib.sha256(file.name.encode('utf-8') + b'\0' + content).hexdigest()
+            retained.setdefault(digest, SelectedDocument('project', file.name, content))
         project_documents = []
-        for index, file in enumerate(extra or []):
-            digest = hashlib.sha256(file.getvalue()).hexdigest()[:16]
-            if st.checkbox(file.name, value=True, key=f'extra_{index}_{digest}'):
-                project_documents.append(SelectedDocument('project', file.name, file.getvalue()))
+        for digest, document in retained.items():
+            if st.checkbox(document.name, value=True, key=f'extra_{digest}'):
+                project_documents.append(document)
     project_start = mode == 'Nieuwe projectarchitectuur'
     base = None if project_start else st.file_uploader('Bestaande solutionarchitectuur (Word)', type=['docx'], key='base')
     st.markdown('<div id="bronnen"></div>', unsafe_allow_html=True)

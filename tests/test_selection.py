@@ -149,3 +149,32 @@ def test_enterprise_deselection_excludes_source(snapshot, tmp_path):
         assert at.metric[0].value == '0'
         assert not at.dataframe
         assert next(b for b in at.button if b.label == 'Genereer de architectuur').disabled
+
+
+def test_project_uploads_persist_across_batches_and_preserve_checkboxes():
+    from io import BytesIO
+    import streamlit as st
+    class Upload(BytesIO):
+        def __init__(self, name, content):
+            super().__init__(content)
+            self.name = name
+    first = Upload('eerste.txt', b'Dit is de eerste projectbron.')
+    second = Upload('tweede.txt', b'Dit is de tweede projectbron.')
+    batch = [first]
+    original = st.file_uploader
+    def uploader(*args, **kwargs):
+        return batch if kwargs.get('key') == 'project_sources' else original(*args, **kwargs)
+    with patch('architect_agent.selection_ui.st.file_uploader', side_effect=uploader):
+        at = AppTest.from_file(str(Path(__file__).parents[1]/'app.py')).run(timeout=30)
+        next(c for c in at.checkbox if c.label == first.name).uncheck().run()
+        batch[:] = [second]
+        at.run()
+        assert not at.exception
+        assert not next(c for c in at.checkbox if c.label == first.name).value
+        assert next(c for c in at.checkbox if c.label == second.name).value
+        batch[:] = [first, second]
+        at.run()
+        assert len(at.session_state['retained_project_sources']) == 2
+        next(c for c in at.checkbox if c.label == first.name).check().run()
+        rows = [name for frame in at.dataframe for name in frame.value['Bron'].tolist()]
+        assert first.name in rows and second.name in rows

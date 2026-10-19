@@ -760,8 +760,12 @@ function render(){
 }
 document.querySelectorAll('.source-toggle').forEach(check=>check.addEventListener('change',render));
 document.querySelectorAll('input[type=file][data-category]').forEach(input=>input.addEventListener('change',()=>{
- const category=input.dataset.category;files[category]=[...input.files].map(file=>({file,selected:true,reading:true,contexts:[],warnings:[],error:null}));render();
- for(const entry of files[category])(async()=>{try{const result=await DocumentReader.read(entry.file);entry.contexts=result.contexts;entry.warnings=result.warnings;entry.pages=result.pages||1;}catch(error){entry.error=error.message;}finally{entry.reading=false;render();}})();
+ const category=input.dataset.category;
+ const incoming=[...input.files].filter(file=>category!=='project'||!files.project.some(entry=>entry.file.name===file.name&&entry.file.size===file.size&&entry.file.lastModified===file.lastModified)).map(file=>({file,selected:true,reading:true,contexts:[],warnings:[],error:null}));
+ files[category]=category==='project'?[...files.project,...incoming]:incoming;
+ if(category==='project')input.value='';
+ render();
+ for(const entry of incoming)(async()=>{try{const result=await DocumentReader.read(entry.file);entry.contexts=result.contexts;entry.warnings=result.warnings;entry.pages=result.pages||1;}catch(error){entry.error=error.message;}finally{entry.reading=false;render();}})();
 }));
 for(const id of ['project-name','project-goals','project-type'])$(id).addEventListener('input',render);
 $('load-enterprise').addEventListener('click',async()=>{
