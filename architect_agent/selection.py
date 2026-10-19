@@ -4,9 +4,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-HORIZON_URL = 'https://rotterdam.horizzon.cloud/sites/8579a6d6-9680-4fee-959c-4793130eef6f/views/e059f7c1-e164-f111-bb43-025a1dd2f359'
-
-
 @dataclass(frozen=True)
 class SourceOption:
     key: str
@@ -19,9 +16,7 @@ SOURCE_OPTIONS = (
     SourceOption('enterprise', 'Enterprise architectuur Platform Dienstverlening',
                  'Het overkoepelende architectuurkader voor het platform.',
                  'Kaders, doelarchitectuur en samenhang met het platform.'),
-    SourceOption('horizon', 'Bouwstenen Rotterdam',
-                 'Selecteer ABB’s en SBB’s uit een Horizzon-export.',
-                 'Rotterdamse bouwstenen uit de aangeleverde bron.'),
+
 )
 
 

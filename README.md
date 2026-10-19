@@ -25,30 +25,13 @@ Open `index.html` door erop te dubbelklikken na het uitpakken van de ZIP. Het be
 ### Bronselectie
 
 - **Enterprise architectuur Platform Dienstverlening**: ophalen van de opgegeven openbare [GitHub-bron](https://github.com/ivorstenbosch-maker/EnterpriseArchitectuurCG/blob/main/Enterprisearchitectuur-GPT.md) of een eigen versie uploaden. **Alle hoofdstukken gaan volledig mee**, zonder hoofdstukkeuze of stilzwijgende inkorting. URL, ophaaldatum en SHA-256 blijven in de bronselectie vastgelegd.
-- **Bouwstenen Rotterdam**: selecteer ABB’s en SBB’s uit een aangeleverde export van de [Horizzon-view](https://rotterdam.horizzon.cloud/sites/8579a6d6-9680-4fee-959c-4793130eef6f/views/e059f7c1-e164-f111-bb43-025a1dd2f359). Zoeken filtert alleen de zichtbare lijst; aangevinkte bouwstenen blijven geselecteerd. Alleen geselecteerde bouwstenen, hun beschrijvingen, object-ID’s en exportkenmerk gaan mee naar generatie.
 - **Projectdocumenten en overige bronnen**: PDF, DOCX, TXT of Markdown lokaal uitlezen, met keuze per bestand. Niet-leesbare bronnen blokkeren generatie totdat ze zijn vervangen of uitgevinkt.
 
-De afzonderlijke secties voor bouwblokkenadvies, bestaande ADR’s en privacy-/beveiligingskaders zijn verwijderd. De oudere adviesmodule en tests van de parsing blijven beschikbaar in de code, maar worden niet gebruikt in dit scherm en leveren geen vervangende Rotterdamse catalogus.
-
-### Rotterdamse bouwstenen uit Horizzon
-
-De openbare URL levert de Horizzon-applicatie, met een authenticatiecontrole op de site-route. Zonder een geautoriseerde sessie zijn hier geen echte Rotterdamse bouwstenengegevens opgehaald. Het losse bestand heeft geen directe live API-koppeling of sessieovername. Gebruik een CSV- of JSON-export van de bouwstenen; de app verzint geen namen, classificaties of verplichtingen. Voor een live koppeling zijn een geautoriseerde API en serverconfiguratie nodig; geen tokens in het deelbare HTML-bestand.
-
-De import ondersteunt een CSV met komma of puntkomma, een JSON-lijst of een JSON-object met `objects` of `building_blocks`. Velden per rij:
-
-| Veld | Herkende namen | Inhoud |
-| --- | --- | --- |
-| ID | id, object id, identifier | Uniek object-ID uit de export |
-| Naam | name, naam | Naam van de bouwsteen |
-| Bouwsteentype | building block type, bouwsteentype, classification, classificatie, type | ABB / Architecture Building Block of SBB / Solution Building Block |
-| Beschrijving (optioneel) | description, beschrijving, documentation, documentatie | Bronbeschrijving |
-| Laag (optioneel) | layer, laag | Expliciete bronlaag, bv. Laag 5 Interactie |
-
-Objecten zonder expliciete ABB/SBB-classificatie, ID of naam worden overgeslagen en geteld. Een ArchiMate-objecttype zoals ApplicationComponent geldt op zichzelf niet als een SBB-classificatie. Dubbele ID’s geven een foutmelding. Maximaal 5 MB en 10.000 objecten per export. Er wordt geen catalogus met fictieve Rotterdamse bouwstenen meegeleverd.
+De module Bouwstenen Rotterdam en de downloadknop voor de bronselectie zijn verwijderd uit de zelfstandige app en Streamlit. De afzonderlijke secties voor bouwblokkenadvies, bestaande ADR’s en privacy-/beveiligingskaders zijn verwijderd. De oudere adviesmodule en tests van de parsing blijven beschikbaar in de code, maar worden niet gebruikt in dit scherm en leveren geen vervangende Rotterdamse catalogus.
 
 ### Generatie, huisstijl en publicatie
 
-**Genereer de architectuur** opent de keuze **Rotterdam / Common Ground** en **PDF / Confluence / Notion** (meerdere mogelijk). Het losse bestand maakt standaard lokaal een eerste brongebaseerd concept: herkenbare bronfragmenten, geselecteerde bouwstenen, concept-ADR en open besluiten. Dit is geen semantische AI-synthese of vastgesteld ontwerp. PDF en HTML gebruiken de gekozen kleuren en typografie. Notion ondersteunt alleen platformkleuren, Confluence behoudt het thema van de doelruimte. De uitvoerprofielen zijn geen gecertificeerde officiële documenttemplates.
+**Genereer de architectuur** opent de keuze **Rotterdam / Common Ground** en **PDF / Confluence / Notion** (meerdere mogelijk). Het losse bestand maakt standaard lokaal een eerste brongebaseerd concept: herkenbare bronfragmenten, concept-ADR en open besluiten. Dit is geen semantische AI-synthese of vastgesteld ontwerp. PDF en HTML gebruiken de gekozen kleuren en typografie. Notion ondersteunt alleen platformkleuren, Confluence behoudt het thema van de doelruimte. De uitvoerprofielen zijn geen gecertificeerde officiële documenttemplates.
 
 Optioneel: open AI-synthese in het generatievenster. Stel `OPENAI_API_KEY` veilig in op de lokale service, `OPENAI_MODEL` is optioneel. Vink expliciet aan dat de geselecteerde bronnen gedeeld mogen worden. Alleen na een klik op genereren gaan volledige geselecteerde bronteksten naar de bestaande AI-workflow. De gedeelde index bevat geen sleutels. De bronlimiet is verhoogd tot **900.000 tekens** om de volledige enterprise architectuur (circa 388.000 tekens) en aanvullende bronnen te ondersteunen. Grotere sets geven een fout; niets wordt automatisch afgekapt. Gebruik een model met voldoende contextcapaciteit; de service garandeert geen capaciteit van een zelf ingesteld ander model.
 
@@ -66,7 +49,7 @@ De service luistert alleen lokaal, controleert toegang en review, verstuurt geen
 
 ### Zelf bouwen en controleren
 
-Voer `.venv/bin/python scripts/build_index.py` uit na wijzigingen in `web/`. Test met `.venv/bin/python -m pytest -q`. De browserproef gebruikt synthetische Horizzon-objecten, geen echte Rotterdamse catalogus. Volledige enterprise-inhoud, ABB/SBB-selectie, bronuitsluiting, PDF en mobiele weergave worden gecontroleerd. AI-aanroepen en publicaties worden uitsluitend gemockt; geen betaalde API-aanroep of echte publicatie voor deze wijziging.
+Voer `.venv/bin/python scripts/build_index.py` uit na wijzigingen in `web/`. Test met `.venv/bin/python -m pytest -q`. Volledige enterprise-inhoud, bronuitsluiting, PDF en mobiele weergave worden gecontroleerd. AI-aanroepen en publicaties worden uitsluitend gemockt; geen betaalde API-aanroep of echte publicatie voor deze wijziging.
 
 ## Publiceren in Notion
 

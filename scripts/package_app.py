@@ -17,7 +17,6 @@ def package():
 
 Gebruik Genereer de architectuur om een brongebaseerd concept te maken.
 Alle hoofdstukken van de enterprise architectuur gaan mee.
-Bouwstenen Rotterdam: importeer een echte Horizzon-export (CSV/JSON) en vink ABB’s/SBB’s aan.
 
 Epics: kies Notion of Microsoft Teams in stap 1.
 - Notion: haal epics op via de ingestelde lokale service, of voeg een eigen epiclink toe.

@@ -52,7 +52,6 @@ def test_fenced_code_does_not_create_chapters():
 def test_missing_sources_are_not_treated_as_available():
     docs = [SelectedDocument('enterprise', 'ea.md', b'inhoud')]
     assert not missing_sources(['enterprise'], docs)
-    assert missing_sources(['enterprise', 'horizon'], docs) == ['Bouwstenen Rotterdam']
     assert missing_sources(['enterprise'], [SelectedDocument('enterprise', 'ea.md', b'')])
 
 
@@ -127,10 +126,8 @@ def test_pa_screen_generates_from_all_chapters(snapshot, plan, tmp_path):
         at.text_area(key='project_goals').set_value('Maak dienstverlening toegankelijker.').run()
         button = next(b for b in at.button if b.label == 'Genereer de architectuur')
         assert not button.disabled
-        # Een geselecteerd kader zonder inhoud blokkeert generatie.
-        at.checkbox(key='use_horizon').check().run()
-        assert next(b for b in at.button if b.label == 'Genereer de architectuur').disabled
-        at.checkbox(key='use_horizon').uncheck().run()
+        assert not any(c.label == 'Bouwstenen Rotterdam' for c in at.checkbox)
+        assert not any(b.label in ('Bewaar bronselectie', 'Download bronselectie') for b in at.get('download_button'))
         next(b for b in at.button if b.label == 'Genereer de architectuur').click().run()
         assert not at.exception
         assert generate.call_count == 1

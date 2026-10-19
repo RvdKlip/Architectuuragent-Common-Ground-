@@ -5,7 +5,7 @@ const PA = (() => {
   const escape = text => String(text).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   function signature() {
     return JSON.stringify({project:$('project-name').value,goals:$('project-goals').value,type:$('project-type').value,
-      epic:Epic.current, documents:selectedDocuments(), chapters:[...remote.selected], blocks:buildingBlocks.selected,
+      epic:Epic.current, documents:selectedDocuments(), chapters:[...remote.selected],
       files:Object.values(files).flat().map(entry=>({name:entry.file.name,size:entry.file.size,modified:entry.file.lastModified,selected:entry.selected}))});
   }
   function stale() { return !!current && current.signature !== signature(); }
@@ -15,7 +15,6 @@ const PA = (() => {
     if (stale()) $('approve-publication').checked=false;
   }
   function inputs() {
-    if(isEnabled('horizon')&&horizon.reading)throw Error('Wacht totdat de Horizzon-export is gelezen.');
     const sources=[];
     if(isEnabled('enterprise') && !files.enterprise.some(entry=>entry.selected) && remote.text) {
       sources.push({filename:'Enterprise-architectuur-volledig.md',pages:1,text:selectedText(),contexts:[{source:'Enterprise-architectuur-volledig.md',text:selectedText()}]});
@@ -29,11 +28,6 @@ const PA = (() => {
     if(missing.length) throw Error('Voeg eerst inhoud toe voor: '+missing.map(category=>categories[category]).join(', '));
 
     if(sources.length>97) throw Error('Selecteer maximaal 97 bronbestanden voor één PA.');
-    if(buildingBlocks.selected.length) {
-      const lines=buildingBlocks.selected.map(block=>block.type+': '+block.name+'\n'+('Object-ID: '+block.id+'\n'+block.description));
-      const text='Geselecteerde Rotterdamse bouwstenen — VOORSTEL, te beoordelen.\nBroncatalogus: '+catalogue.source.url+'\nExport: '+horizon.filename+'\nSHA-256: '+catalogue.source.sha256+'\n'+lines.join('\n\n');
-      sources.push({filename:'Bouwstenen-Rotterdam-selectie.md',pages:1,text,contexts:[{source:'Bouwstenen-Rotterdam-selectie.md',text}]});
-    }
     const epic=Epic.document();if(epic)sources.push({...epic,contexts:[{source:epic.filename,text:epic.text}]});
     if(!sources.length)throw Error('Selecteer minstens één leesbare bron.');
     return sources.map((source,index)=>({...source,key:'B'+String(index).padStart(2,'0')}));
@@ -47,25 +41,23 @@ const PA = (() => {
   function makePlan(sources) {
     const project=$('project-name').value.trim(), goals=$('project-goals').value.trim();
     const changes=[];
-    for(const source of sources.filter(source=>source.filename!=='Bouwstenen-Rotterdam-selectie.md')) {
+    for(const source of sources) {
       for(const excerpt of excerpts(source,project+' '+goals)) {
         const page=excerpt.source.match(/ p\.(\d+)$/);
         changes.push({section:'Bronuitgangspunt — '+source.filename,change:'Bronfragment: “'+excerpt.text+'”',
           rationale:'Letterlijk fragment uit de geselecteerde bron. Interpretatie en toepasselijkheid moeten nog worden beoordeeld.',evidence:[source.key+(page?' p.'+page[1]:' tekst')]});
       }
     }
-    const adviceSource=sources.find(source=>source.filename==='Bouwstenen-Rotterdam-selectie.md');
-    if(adviceSource) changes.push({section:'Geselecteerde Rotterdamse bouwstenen',change:buildingBlocks.selected.map(block=>block.type+': '+block.name).join('; '),rationale:'Handmatige selectie uit de aangeleverde Horizzon-export. Geen vastgesteld besluit.',evidence:[adviceSource.key+' tekst']});
     const names={5:'Interactie',4:'Procesinrichting',3:'Connectiviteit',2:'Diensten',1:'Registraties'};
-    const layers=[5,4,3,2,1].map(number=>({number,name:names[number],components:buildingBlocks.selected.filter(block=>(block.layer||'').startsWith('Laag '+number+' ')).map(block=>block.type+': '+block.name)}));
+    const layers=[5,4,3,2,1].map(number=>({number,name:names[number],components:[]}));
     for(const layer of layers) if(!layer.components.length) layer.components=['Nog te bepalen op basis van inhoudelijke architectuurreview.'];
     return {title:'Projectarchitectuur — '+project,scope:goals,
-      management_summary:'Eerste concept-PA voor '+project+'. Projectdoel en afbakening: '+goals+'. Samengesteld uit '+sources.length+' geselecteerde bronnen. De bronfragmenten en bouwblokken zijn geordend voor review; er is geen semantische AI-synthese uitgevoerd.',
+      management_summary:'Eerste concept-PA voor '+project+'. Projectdoel en afbakening: '+goals+'. Samengesteld uit '+sources.length+' geselecteerde bronnen. De bronfragmenten zijn geordend voor review; er is geen semantische AI-synthese uitgevoerd.',
       changes,layers,flow_steps:['Bron en bronhouder: inhoudelijk vast te stellen','Verwerking en gegevensuitwisseling: inhoudelijk vast te stellen','Afnemer en gebruik: inhoudelijk vast te stellen'],
       adr:{title:'Voorgenomen architectuurkeuzes voor '+project,status:'Concept – ter besluitvorming',context:goals,
-        decision:'VOORSTEL: beoordeel de geselecteerde bronuitgangspunten en bouwblokken op toepasbaarheid voordat architectuurkeuzes worden vastgesteld.',principles:['Pas uitsluitend aantoonbaar geldende kaders uit de geselecteerde bronnen toe.'],
-        implications:['Toepasselijkheid, gegevensstromen, verantwoordelijkheden en randvoorwaarden vragen inhoudelijke review.'],concerns:['De automatische conceptversie gebruikt bronfragmenten en een handmatige bouwstenenselectie; volledige inhoudelijke synthese ontbreekt nog.'],implementation:['Controleer de bronverwijzingen.','Bespreek open besluiten met de verantwoordelijke architect.'],relation_existing_adrs:'Bestaande ADR’s en hun oorspronkelijke status blijven van kracht; er wordt geen herroeping verondersteld.'},
-      decision_rules:[],open_decisions:['Welke geselecteerde bouwblokken worden daadwerkelijk toegepast?','Welke bronhouders, koppelingen en gegevensstromen zijn nodig?','Welke aanvullende kaders en bestaande besluiten zijn op dit project van toepassing?'],
+        decision:'VOORSTEL: beoordeel de geselecteerde bronuitgangspunten op toepasbaarheid voordat architectuurkeuzes worden vastgesteld.',principles:['Pas uitsluitend aantoonbaar geldende kaders uit de geselecteerde bronnen toe.'],
+        implications:['Toepasselijkheid, gegevensstromen, verantwoordelijkheden en randvoorwaarden vragen inhoudelijke review.'],concerns:['De automatische conceptversie gebruikt bronfragmenten; volledige inhoudelijke synthese ontbreekt nog.'],implementation:['Controleer de bronverwijzingen.','Bespreek open besluiten met de verantwoordelijke architect.'],relation_existing_adrs:'Bestaande ADR’s en hun oorspronkelijke status blijven van kracht; er wordt geen herroeping verondersteld.'},
+      decision_rules:[],open_decisions:['Welke bronhouders, koppelingen en gegevensstromen zijn nodig?','Welke aanvullende kaders en bestaande besluiten zijn op dit project van toepassing?'],
       assumptions:['Deze PA is een automatisch samengesteld eerste concept, geen vastgesteld architectuurbesluit.','De weergegeven bronfragmenten zijn een expliciete selectie, geen volledige samenvatting van alle documenten.','De huisstijlprofielen gebruiken kleur, typografie en documentstructuur; er zijn geen officiële logo’s of gelicenseerde huisstijlfonts meegeleverd.']};
   }
   function sections(plan,sources) {
@@ -102,7 +94,6 @@ const PA = (() => {
     event.preventDefault();
     $('confirm-generate').disabled=true;
     try {
-      renderBuildingBlocks();
       if(!$('project-name').value.trim()||!$('project-goals').value.trim())throw Error('Vul eerst een projectnaam en doel/afbakening in.');
       const brand=document.querySelector('input[name=brand]:checked').value;
       const destinations=[...document.querySelectorAll('input[name=destination]:checked')].map(input=>input.value);

@@ -111,5 +111,5 @@ def test_streamlit_removed_sections_and_no_automatic_building_block_source():
     assert not at.exception
     assert not any(c.key and c.key.startswith('building_block_') for c in at.checkbox)
     assert not any(c.key in ('use_adrs', 'use_policy') for c in at.checkbox)
-    assert at.checkbox(key='use_horizon').label == 'Bouwstenen Rotterdam'
+    assert not any(c.key == 'use_horizon' for c in at.checkbox)
     assert not any('Bouwblokkenadvies.md' in frame.value['Bron'].tolist() for frame in at.dataframe)

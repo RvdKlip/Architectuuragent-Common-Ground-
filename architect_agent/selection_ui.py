@@ -1,11 +1,9 @@
 """Selecteer bronnen voor een projectarchitectuur; enterprise architectuur altijd volledig."""
 import hashlib
-import json
 import streamlit as st
 from .catalogue import CACHE, ENTERPRISE_GITHUB, ENTERPRISE_GITBOOK, load_enterprise
-from .selection import HORIZON_URL, SOURCE_OPTIONS, SelectedDocument, missing_sources
+from .selection import SOURCE_OPTIONS, SelectedDocument, missing_sources
 from .presentation import render_hero, render_steps
-from .horizzon import parse_export
 from .epics_ui import render_epic
 
 
@@ -30,9 +28,7 @@ def render_selection(notion_token="") -> dict:
     st.subheader('2. Bouw je fundament')
     documents, selected = [], []
     enterprise_metadata = None
-    building_blocks = {'selected': [], 'source': {'url': HORIZON_URL}}
-    left, right = st.columns(2)
-    with left, st.container(border=True):
+    with st.container(border=True):
         enabled = st.checkbox(SOURCE_OPTIONS[0].title, value=True, key='use_enterprise')
         if enabled:
             selected.append('enterprise')
@@ -62,31 +58,6 @@ def render_selection(notion_token="") -> dict:
             uploaded = st.file_uploader('Eigen versie uploaden', type=['pdf', 'docx', 'txt', 'md'], key='files_enterprise', disabled=not enabled)
             if uploaded and enabled:
                 documents.append(SelectedDocument('enterprise', uploaded.name, uploaded.getvalue()))
-    with right, st.container(border=True):
-        enabled = st.checkbox('Bouwstenen Rotterdam', key='use_horizon')
-        if enabled:
-            selected.append('horizon')
-        st.markdown('[Open bouwstenen in Horizzon ↗]('+HORIZON_URL+')')
-        st.caption('Een ingelogde Horizzon-sessie kan niet worden overgenomen. Importeer een CSV- of JSON-export om echte Rotterdamse ABB’s en SBB’s te selecteren.')
-        uploaded = st.file_uploader('Bouwstenencatalogus uit Horizzon', type=['csv', 'json'], key='horizzon_catalogue', disabled=not enabled)
-        if uploaded and enabled:
-            try:
-                blocks, skipped = parse_export(uploaded.getvalue(), uploaded.name)
-                digest = hashlib.sha256(uploaded.getvalue()).hexdigest()
-                st.caption(f'{len(blocks)} bouwstenen geladen; {skipped} objecten zonder bruikbare ABB/SBB-classificatie overgeslagen.')
-                chosen = []
-                for kind in ('ABB', 'SBB'):
-                    candidates = {b['id']: b for b in blocks if b['type'] == kind}
-                    ids = st.multiselect(kind+'’s', list(candidates), format_func=lambda key: candidates[key]['name'], key='horizzon_'+kind+'_'+digest)
-                    chosen.extend(candidates[key] for key in ids)
-                building_blocks = {'selected': chosen, 'source': {'url': HORIZON_URL, 'export': uploaded.name, 'sha256': digest}, 'method': 'Handmatige selectie uit aangeleverde Horizzon-export.'}
-                if chosen:
-                    text = '# Geselecteerde Rotterdamse bouwstenen — VOORSTEL, te beoordelen\n\n'+f'Bron: {HORIZON_URL}\nExport: {uploaded.name}\nSHA-256: {digest}\n\n'+'\n\n'.join(b['type']+': '+b['name']+'\nObject-ID: '+b['id']+'\n'+b['description'] for b in chosen)
-                    documents.append(SelectedDocument('horizon', 'Bouwstenen-Rotterdam-selectie.md', text.encode('utf-8')))
-            except (ValueError, UnicodeError, TypeError, AttributeError) as error:
-                st.error(str(error))
-        with st.expander('Welke exportvelden zijn nodig?'):
-            st.caption('CSV (komma of puntkomma) of JSON-lijst: id, name, type (ABB of SBB), optioneel description. Ook naam, beschrijving en bouwsteentype worden herkend. Andere objecttypen worden overgeslagen.')
     with st.container(border=True):
         st.subheader('Projectdocumenten en overige bronnen')
         extra = st.file_uploader('Projectbronnen uploaden', type=['pdf', 'docx', 'txt', 'md'], accept_multiple_files=True, key='project_sources')
@@ -112,7 +83,5 @@ def render_selection(notion_token="") -> dict:
     if missing:
         st.warning('Nog inhoud nodig voor: ' + '; '.join(missing))
     manifest = {'project': scope, 'goals': goals, 'type': mode, 'sources': rows, 'missing': missing,
-                'epic': epic, 'enterprise_architecture': enterprise_metadata, 'building_blocks': building_blocks,
-                'horizon': {'url': HORIZON_URL, 'content_loaded': bool(building_blocks['selected'])}}
-    st.download_button('Download bronselectie', json.dumps(manifest, ensure_ascii=False, indent=2), file_name='bronselectie.json', mime='application/json')
+                'epic': epic, 'enterprise_architecture': enterprise_metadata}
     return {'project_start': project_start, 'scope': scope, 'goals': goals, 'base': base, 'documents': documents, 'missing': missing, 'manifest': manifest}
