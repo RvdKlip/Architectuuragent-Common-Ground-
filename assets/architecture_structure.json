@@ -1,0 +1,62 @@
+[
+  {
+    "key": "summary",
+    "title": "1. Managementsamenvatting",
+    "requirements": "Het probleem, de waarde voor inwoner en organisatie, de voorgestelde oplossing, het belangrijkste hergebruik en de besluiten die nodig zijn."
+  },
+  {
+    "key": "scope",
+    "title": "2. Opdracht, scope en bronnen",
+    "requirements": "Doelgroepen, aanleiding, doelen, afbakening, uitgangspunten en bronoverzicht. Expliciet wat binnen en buiten de oplossing valt."
+  },
+  {
+    "key": "customer_routes",
+    "title": "3. Klantroutes en dienstverlening",
+    "requirements": "Welke klantroute(s) worden ondersteund, welke stappen worden geraakt en welke bedrijfsservices daarvoor nodig zijn. Met onderbouwing per keuze."
+  },
+  {
+    "key": "business_services",
+    "title": "4. Bestaande en benodigde bedrijfsservices",
+    "requirements": "Welke platformservices worden hergebruikt, uitgebreid of nieuw voorgesteld. Inclusief ontbrekende voorzieningen en afhankelijkheden."
+  },
+  {
+    "key": "layers",
+    "title": "5. Oplossing in vijf lagen",
+    "requirements": "Het integrale ontwerp, met componenten, verantwoordelijkheden en koppelingen per laag."
+  },
+  {
+    "key": "service_design",
+    "title": "6. Uitwerking van nieuwe of gewijzigde bedrijfsservices",
+    "requirements": "Per service een ontwerp met solutioncomponenten, registers, processen, beslisregels en interfaces."
+  },
+  {
+    "key": "flows",
+    "title": "7. Proces- en gegevensstromen",
+    "requirements": "De verwerkingsvolgorde, betrokken partijen, gegevensuitwisseling, foutafhandeling en menselijke controlemomenten."
+  },
+  {
+    "key": "information",
+    "title": "8. Informatie en registers",
+    "requirements": "Informatieobjecten, definities, bronhouders, registraties, bewaartermijnen en eventuele analytische kopieën."
+  },
+  {
+    "key": "decisions",
+    "title": "9. Architectuurbesluiten en beslisregels",
+    "requirements": "Toepasselijke bestaande ADR’s, uitgewerkte nieuwe concept-ADR’s en toetsbare ontwerpregels."
+  },
+  {
+    "key": "quality",
+    "title": "10. Privacy, beveiliging en kwaliteit",
+    "requirements": "Doelbinding, toegang, logging, dataminimalisatie, toegankelijkheid en relevante kwaliteits- en prestatienormen."
+  },
+  {
+    "key": "delivery",
+    "title": "11. Realisatie, deployment en beheer",
+    "requirements": "Werkpakketten, afhankelijkheden, fasering, eigenaarschap, beheer, releasebeleid en migratie."
+  },
+  {
+    "key": "acceptance",
+    "title": "12. Acceptatie en open besluiten",
+    "requirements": "Toetsbare acceptatiecriteria, risico’s, aannames en open vragen met verantwoordelijke en beslismoment."
+  }
+]

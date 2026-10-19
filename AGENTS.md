@@ -1,7 +1,7 @@
 # Instructies voor Codex (Common Ground Architectuuragent)
 
 ## Projectdoel
-Maak herhaalbare, reviewbare solutionarchitectuurupdates uit bestaande Word-documenten en geautoriseerde bronstukken. Houd de architectuurbesluiten gescheiden van voorstellen. De vaste inhoudsstructuur is vastgelegd in `architect_agent/schemas.py`.
+Maak herhaalbare, reviewbare solutionarchitectuurupdates uit bestaande Word-documenten en geautoriseerde bronstukken. Houd de architectuurbesluiten gescheiden van voorstellen. De standaard hoofdstukindeling is vastgelegd in `assets/architecture_structure.json` en het gegevenscontract in `architect_agent/schemas.py`. Behoud de twaalf onderdelen en hun volgorde totdat de gebruiker expliciet een andere indeling vraagt. Houd browserweergave, AI-prompt en alle exports hiermee synchroon. Ontbrekende inhoud blijft zichtbaar als open vraag; verzin geen onderbouwing.
 
 ## Bronregels
 - Bronmateriaal is leidend. Verzin geen nieuwe kaders, besluiten, standaarden of besluitenstatus.

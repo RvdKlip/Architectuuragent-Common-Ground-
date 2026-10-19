@@ -101,6 +101,8 @@ def test_psa_request_asks_for_new_architecture_with_selected_sources(snapshot, p
     assert 'nieuwe concept-projectarchitectuur' in request['instructions']
     assert 'B00 tekst' in request['input']
     assert 'niet-geselecteerde tekst' not in request['input']
+    assert '12. Acceptatie en open besluiten' in request['input']
+    assert 'chapter_content' in request['text']['format']['schema']['required']
 
 
 def test_source_limit_stops_before_api_call(tmp_path):

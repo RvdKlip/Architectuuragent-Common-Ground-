@@ -65,43 +65,11 @@ def blocks_for_plan(plan: dict, sources: list) -> list[dict]:
             add('bulleted_list_item', item)
 
     paragraph('CONCEPT — ter review en besluitvorming. Publicatie in Notion stelt dit voorstel niet formeel vast.')
-    paragraph('Onderwerp: ' + plan['scope'])
-    heading('Managementsamenvatting')
-    paragraph(plan['management_summary'])
-    heading('Voorgestelde wijzigingen')
-    for change in plan['changes']:
-        add('heading_3', change['section'])
-        paragraph(change['change'])
-        paragraph('Onderbouwing: ' + change['rationale'])
-        paragraph('Bron: ' + ', '.join(change['evidence']))
-    heading('Architectuur in vijf lagen')
-    for layer in sorted(plan['layers'], key=lambda x: x['number'], reverse=True):
-        add('heading_3', f"{layer['number']}. {layer['name']}")
-        bullets(layer['components'])
-    heading('Gegevensstroom')
-    for step in plan['flow_steps']:
-        add('numbered_list_item', step)
-    heading('ADR — CONCEPT: ' + plan['adr']['title'])
-    adr = plan['adr']
-    paragraph('Status: ' + adr['status'])
-    for title, key in [('Context', 'context'), ('Besluit (voorgesteld)', 'decision'),
-                       ('Principe', 'principles'), ('Implicatie', 'implications'),
-                       ('Eventuele zorgen', 'concerns'), ('Implementatie', 'implementation'),
-                       ('Samenhang met bestaande ADR’s', 'relation_existing_adrs')]:
-        add('heading_3', title)
-        if isinstance(adr[key], list):
-            bullets(adr[key])
-        else:
-            paragraph(adr[key])
-    heading('Architectuurregels')
-    for rule in plan['decision_rules']:
-        paragraph(f"{rule['id']} — {rule['rule']}\nBron: {', '.join(rule['evidence'])}\nStatus: {rule['status']}")
-    heading('Openstaande besluiten')
-    bullets(plan['open_decisions'])
-    heading('Aannames en controlepunten')
-    bullets(plan['assumptions'])
-    heading('Bronnen en herleidbaarheid')
-    bullets([s.reference for s in sources])
+    from .output import report_sections
+    for title, lines in report_sections(plan, sources):
+        heading(title)
+        for line in lines:
+            paragraph(str(line))
     paragraph('Verifieer de bronverwijzingen handmatig. Bronbestanden en volledige bronteksten zijn niet meegestuurd naar Notion.')
     return blocks
 

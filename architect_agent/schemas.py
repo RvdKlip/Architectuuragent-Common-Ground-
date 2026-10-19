@@ -1,6 +1,10 @@
 """Vast gegevenscontract tussen taalmodel, review en Office-generator."""
 from __future__ import annotations
 import re
+import json
+from pathlib import Path
+
+ARCHITECTURE_STRUCTURE = json.loads((Path(__file__).resolve().parents[1]/'assets/architecture_structure.json').read_text(encoding='utf-8'))
 
 
 def object_schema(properties: dict) -> dict:
@@ -14,6 +18,7 @@ def array(schema: dict) -> dict:
 STR = {"type": "string"}
 STR_LIST = array(STR)
 UPDATE_SCHEMA = object_schema({
+    "chapter_content": object_schema({chapter["key"]: {**array(object_schema({"text": STR, "evidence": STR_LIST})), "minItems": 1} for chapter in ARCHITECTURE_STRUCTURE}),
     "title": STR,
     "scope": STR,
     "management_summary": STR,
@@ -36,7 +41,7 @@ def validate(plan: dict, sources: list | None = None) -> list[str]:
     errors = []
     required = UPDATE_SCHEMA['required']
     for key in required:
-        if key not in plan:
+        if key != 'chapter_content' and key not in plan:
             errors.append(f"Ontbrekend hoofdveld: {key}")
     if errors:
         return errors
@@ -57,6 +62,21 @@ def validate(plan: dict, sources: list | None = None) -> list[str]:
         evidence.extend(change.get('evidence', []))
     for rule in plan.get('decision_rules', []):
         evidence.extend(rule.get('evidence', []))
+    if 'chapter_content' in plan:
+        content = plan['chapter_content']
+        expected = {chapter['key'] for chapter in ARCHITECTURE_STRUCTURE}
+        if not isinstance(content, dict) or set(content) != expected:
+            errors.append('chapter_content moet exact de twaalf standaardonderdelen bevatten')
+        else:
+            for key, entries in content.items():
+                if not isinstance(entries, list) or not entries:
+                    errors.append(f'Hoofdstuk {key} mist inhoud of een expliciete open vraag')
+                    continue
+                for entry in entries:
+                    if not isinstance(entry, dict) or not isinstance(entry.get('text'), str) or not entry['text'].strip() or not isinstance(entry.get('evidence'), list) or not all(isinstance(c, str) for c in entry['evidence']):
+                        errors.append(f'Ongeldige hoofdstukinhoud: {key}')
+                    else:
+                        evidence.extend(entry['evidence'])
     known = {s.key: s.pages for s in sources or []}
     for cite in evidence:
         match = re.search(r'\b(B\d\d)(?:\s+p\.?\s*(\d+)|\s+doc|\s+tekst)?\b', cite, flags=re.I)

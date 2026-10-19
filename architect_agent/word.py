@@ -116,44 +116,15 @@ def make_document(base_doc: Path, plan: dict, sources: list, figures: dict, dest
     para(doc, f"Gegenereerd op {date.today().strftime('%d-%m-%Y')} · onderwerp: {plan['scope']}")
     para(doc, 'Deze gecontroleerde aanvulling wijzigt de bestaande hoofdstukken niet. De inhoud is een voorstel, geen vastgesteld architectuurbesluit. Bij volgende runs vervangt de agent uitsluitend deze eigen aanvulling.')
 
-    doc.add_heading('A. Managementsamenvatting en wijzigingen', 2)
-    para(doc,plan['management_summary'])
-    for idx,ch in enumerate(plan['changes'],1):
-        doc.add_heading(f"A.{idx} {ch['section']}",3)
-        para(doc,ch['change'])
-        para(doc,'Onderbouwing: '+ch['rationale'])
-        para(doc,'Bron: '+(', '.join(ch['evidence']) or 'geen bron — beoordelen'))
-
-    doc.add_heading('B. Architectuurbeeld en gegevensstroom',2)
-    image(doc,figures['layers'],'Figuur A: positionering binnen het vijf-lagenmodel van Platform Dienstverlening.')
-    mapping=[]
-    for layer in sorted(plan['layers'],key=lambda x:x['number'],reverse=True):
-        mapping.append((f"{layer['number']}. {layer['name']}", '; '.join(layer['components'])))
-    table(doc,['Laag','Voorgestelde componenten'],mapping)
-    image(doc,figures['flow'],'Figuur B: voorgestelde gegevensstroom; details toetsen aan de bron- en privacyafspraken.')
-
-    doc.add_heading('C. Architectural decision record (ADR) — CONCEPT',2)
-    adr=plan['adr']
-    doc.add_heading(adr['title'],3)
-    para(doc,'Status: '+adr['status'])
-    para(doc,'Gremium (ter besluitvorming): Technische stuurgroep Platform Dienstverlening')
-    for key,content in [ ('Context',adr['context']), ('Besluit (voorgesteld)',adr['decision']) ]:
-        doc.add_heading(key,3);para(doc,content)
-    for key,listval in [ ('Principe',adr['principles']),('Implicatie',adr['implications']),('Eventuele zorgen',adr['concerns']),('Implementatie',adr['implementation']) ]:
-        doc.add_heading(key,3); bullets(doc,listval)
-    doc.add_heading('Samenhang met bestaande ADR’s',3)
-    para(doc,adr['relation_existing_adrs'])
-
-    doc.add_heading('D. Architectuur decision rules (toetsbare constraints)',2)
-    table(doc,['Regel','Ontwerpconstraint','Herkomst','Status'],[
-        (v['id'],v['rule'],', '.join(v['evidence']),v['status']) for v in plan['decision_rules']
-    ])
-    doc.add_heading('E. Open besluiten en aannames',2)
-    doc.add_heading('Openstaande besluiten',3);bullets(doc,plan['open_decisions'])
-    doc.add_heading('Aannames en controlepunten',3);bullets(doc,plan['assumptions'])
-    doc.add_heading('F. Bronnen en herleidbaarheid',2)
-    table(doc,['Kenmerk','Bronbestand'],[(s.key,s.filename) for s in sources])
-    para(doc,'De broncodes bij wijzigingen en decision rules verwijzen naar deze documenten. Verifieer de verwijzingen handmatig bij de architectuurreview.')
+    from .output import report_sections
+    for index, (title, lines) in enumerate(report_sections(plan, sources), 1):
+        doc.add_heading(title, 2)
+        if index == 5:
+            image(doc, figures['layers'], 'Positionering binnen het vijflagenmodel van Platform Dienstverlening — concept.')
+        elif index == 7:
+            image(doc, figures['flow'], 'Voorgestelde proces- en gegevensstroom — concept; toetsen aan bron- en privacyafspraken.')
+        for line in lines:
+            para(doc, str(line))
     marker(doc, END)
     destination=Path(destination)
     destination.parent.mkdir(parents=True,exist_ok=True)

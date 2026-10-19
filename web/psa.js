@@ -1,6 +1,7 @@
 /* Brongetrouw eerste concept en PDF-uitvoer; geen AI- of publicatieaanroep bij genereren. */
 const PA = (() => {
   const styles = JSON.parse(document.getElementById('house-styles').textContent);
+  const structure = JSON.parse(document.getElementById('architecture-structure').textContent);
   let current = null;
   const escape = text => String(text).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   function signature() {
@@ -50,7 +51,8 @@ const PA = (() => {
     const names={5:'Interactie',4:'Procesinrichting',3:'Connectiviteit',2:'Diensten',1:'Registraties'};
     const layers=[5,4,3,2,1].map(number=>({number,name:names[number],components:[]}));
     for(const layer of layers) if(!layer.components.length) layer.components=['Nog te bepalen op basis van inhoudelijke architectuurreview.'];
-    return {title:'Projectarchitectuur — '+project,scope:goals,
+    const chapter_content=Object.fromEntries(structure.map(chapter=>[chapter.key,[{text:'Nog te bepalen op basis van bronanalyse en architectuurreview: '+chapter.requirements,evidence:[]}]]));
+    return {chapter_content,title:'Projectarchitectuur — '+project,scope:goals,
       management_summary:'Eerste concept-PA voor '+project+'. Projectdoel en afbakening: '+goals+'. Samengesteld uit '+sources.length+' geselecteerde bronnen. De bronfragmenten zijn geordend voor review; er is geen semantische AI-synthese uitgevoerd.',
       changes,layers,flow_steps:['Bron en bronhouder: inhoudelijk vast te stellen','Verwerking en gegevensuitwisseling: inhoudelijk vast te stellen','Afnemer en gebruik: inhoudelijk vast te stellen'],
       adr:{title:'Voorgenomen architectuurkeuzes voor '+project,status:'Concept – ter besluitvorming',context:goals,
@@ -60,14 +62,28 @@ const PA = (() => {
       assumptions:['Deze PA is een automatisch samengesteld eerste concept, geen vastgesteld architectuurbesluit.','De weergegeven bronfragmenten zijn een expliciete selectie, geen volledige samenvatting van alle documenten.','De huisstijlprofielen gebruiken kleur, typografie en documentstructuur; er zijn geen officiële logo’s of gelicenseerde huisstijlfonts meegeleverd.']};
   }
   function sections(plan,sources) {
-    const result=[['Project en afbakening',[plan.scope]],['Managementsamenvatting',[plan.management_summary]]];
-    for(const change of plan.changes) result.push(['Architectuurkeuze: '+change.section,[change.change,'Onderbouwing: '+change.rationale,'Bron: '+change.evidence.join(', ')]]);
-    for(const layer of [...plan.layers].sort((a,b)=>b.number-a.number)) result.push(['Laag '+layer.number+' — '+layer.name,layer.components]);
-    result.push(['Gegevensstroom',plan.flow_steps],['ADR — '+plan.adr.title,['Status: '+plan.adr.status,'Context: '+plan.adr.context,'Voorgesteld besluit: '+plan.adr.decision]]);
-    for(const [title,key] of [['Principes','principles'],['Implicaties','implications'],['Zorgen','concerns'],['Implementatie','implementation']]) result.push([title,plan.adr[key]]);
-    result.push(['Samenhang met bestaande ADR’s',[plan.adr.relation_existing_adrs]],['Architectuurregels',plan.decision_rules.map(rule=>rule.id+': '+rule.rule+' — '+rule.status+'; bron: '+rule.evidence.join(', '))],['Open besluiten',plan.open_decisions],['Aannames en controlepunten',plan.assumptions],['Bronnen',sources.map(source=>source.key+' — '+source.filename)]);
-    return result;
+    return structure.map(chapter=>{
+      const key=chapter.key;
+      const lines=(plan.chapter_content?.[key]||[]).map(entry=>entry.text+(entry.evidence.length?'\nBron: '+entry.evidence.join(', '):''));
+      if(!lines.length&&!['summary','scope','layers','flows','decisions'].includes(key))lines.push('Nog te bepalen op basis van bronanalyse en architectuurreview: '+chapter.requirements);
+      if(key==='summary')lines.unshift(plan.management_summary);
+      else if(key==='scope'){
+        lines.unshift('Opdracht en afbakening: '+plan.scope);
+        for(const change of plan.changes)lines.push('Architectuurkeuze: '+change.section,change.change,'Onderbouwing: '+change.rationale,'Bron: '+change.evidence.join(', '));
+        lines.push('Bronnen en herleidbaarheid:',...sources.map(source=>source.key+' — '+source.filename));
+      }else if(key==='layers'){
+        for(const layer of [...plan.layers].sort((a,b)=>b.number-a.number))lines.push('Laag '+layer.number+' — '+layer.name,...layer.components);
+      }else if(key==='flows')lines.push(...plan.flow_steps);
+      else if(key==='decisions'){
+        const adr=plan.adr;
+        lines.push('ADR — '+adr.title,'Status: '+adr.status,'Context: '+adr.context,'Besluit (voorgesteld): '+adr.decision);
+        for(const [title,field] of [['Principe','principles'],['Implicatie','implications'],['Eventuele zorgen','concerns'],['Implementatie','implementation']])lines.push(title+':',...adr[field]);
+        lines.push('Samenhang met bestaande ADR’s: '+adr.relation_existing_adrs,'Architectuurregels:',...plan.decision_rules.map(rule=>rule.id+': '+rule.rule+' — '+rule.status+'; bron: '+rule.evidence.join(', ')));
+      }else if(key==='acceptance')lines.push('Open besluiten:',...plan.open_decisions,'Aannames en controlepunten:',...plan.assumptions);
+      return [chapter.title,lines];
+    });
   }
+
   function html(report,whole=true) {
     const style=styles[report.brand];
     const body='<h1 class="result-heading" style="color:'+style.primary+'">'+escape(report.plan.title)+'</h1><div class="result-banner" style="background:'+style.pale+';border-color:'+style.primary+'">CONCEPT — ter beoordeling · Huisstijl: '+escape(report.brand)+'</div>'+sections(report.plan,report.sources).map(([title,lines])=>'<section class="result-section"><h2 style="color:'+style.primary+'">'+escape(title)+'</h2>'+lines.map(line=>'<p>'+escape(line)+'</p>').join('')+'</section>').join('');

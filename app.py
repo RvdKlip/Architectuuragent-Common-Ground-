@@ -124,7 +124,7 @@ if 'agent_plan_json' in st.session_state:
     except Exception:
         st.info('Herstel de concept-JSON voordat je de PA-uitvoer downloadt.')
     if output_notion:
-        st.caption('Notion krijgt bewerkbare tekst: samenvatting, wijzigingen, vijf lagen, gegevensstroom, ADR, regels en bronoverzicht. Diagramafbeeldingen worden in deze eerste versie niet geüpload.')
+        st.caption('Notion krijgt bewerkbare tekst met de twaalf standaardonderdelen van de architectuur. Diagramafbeeldingen worden in deze eerste versie niet geüpload.')
         publication_key=hashlib.sha256((modified+notion_parent+brand+repr(st.session_state['agent_sources'])).encode()).hexdigest()
         approved=st.checkbox('Ik heb dit concept gereviewd en mag deze inhoud in de gekozen Notion-pagina publiceren.',key='approve_'+publication_key)
         publications=st.session_state.setdefault('notion_publications',{})

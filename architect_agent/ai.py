@@ -2,7 +2,7 @@
 from __future__ import annotations
 import json
 import os
-from .schemas import UPDATE_SCHEMA, validate
+from .schemas import UPDATE_SCHEMA, validate, ARCHITECTURE_STRUCTURE
 from .sources import Source, source_context
 
 INSTRUCTIONS = """Je bent een ervaren solutionarchitect voor de Nederlandse overheid,
@@ -52,6 +52,15 @@ def generate_plan(sources: list[Source], scope: str, goals: str, model: str | No
         f"GEWENST ONDERWERP: {scope}\nSPECIFIEKE OPDRACHT: {goals}\n\n"
         + purpose + source_context(sources)
     )
+    structure = '\n'.join(chapter['title'] + ': ' + chapter['requirements'] for chapter in ARCHITECTURE_STRUCTURE)
+    prompt += '\n\nVERPLICHTE STANDAARDINDELING (alle twaalf onderdelen uitwerken):\n' + structure
+    prompt += ('\nVul chapter_content per hoofdstuksleutel met inhoudelijke alinea’s (text) en '
+               'controleerbare bronverwijzingen (evidence). Neem alle genoemde aspecten mee. '
+               'Hergebruik de gestructureerde lagen, ADR en regels; vermijd tegenstrijdige herhaling. '
+               'Onderbouw feiten en ontwerpkeuzes met bronnen. Markeer aanvullende ontwerpen VOORSTEL. '
+               'Bij ontbrekende informatie: schrijf Nog te bepalen, noem de ontbrekende bron of beslissing, '
+               'de verantwoordelijke en het beslismoment als die bekend zijn. Verzin geen details. '
+               'Deze vaste structuur blijft de standaard totdat de gebruiker later een andere indeling vraagt.')
     client = OpenAI()
     response = client.responses.create(
         model=model,
@@ -60,7 +69,7 @@ def generate_plan(sources: list[Source], scope: str, goals: str, model: str | No
             'een concept-update voor een bestaand solutionarchitectuurdocument.'),
         input=prompt,
         text={"format":{"type":"json_schema","name":"architectuur_update","strict":True,"schema":UPDATE_SCHEMA}},
-        max_output_tokens=9500,
+        max_output_tokens=16000,
     )
     if not response.output_text:
         raise ValueError('Het model gaf geen uitleesbare JSON terug.')

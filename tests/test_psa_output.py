@@ -68,7 +68,7 @@ def test_confluence_does_not_send_token_to_untrusted_host(plan,sources):
 def test_notion_style_uses_supported_platform_color(plan,sources):
     with patch('architect_agent.notion._request',return_value={'id':'123','url':'https://www.notion.so/123'}) as send:
         notion_publish(plan,sources,'0123456789abcdef0123456789abcdef','test-only',brand='Rotterdam')
-    blocks=send.call_args.args[3]['children']
+    blocks=[block for call in send.call_args_list for block in call.args[3]['children']]
     assert blocks[0]['paragraph']['color']=='green'
     assert 'Rotterdam' in blocks[0]['paragraph']['rich_text'][0]['text']['content']
     assert all(block[block['type']]['color']=='green' for block in blocks if block['type'].startswith('heading_'))

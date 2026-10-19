@@ -1,5 +1,24 @@
 # Common Ground Architectuuragent
 
+## Vaste indeling van de gegenereerde architectuur
+
+Totdat de gebruiker een andere indeling vraagt, gebruiken de browserapp, AI-generatie en HTML-, PDF-, Word-, Notion- en Confluence-uitvoer dezelfde twaalf onderdelen:
+
+1. Managementsamenvatting
+2. Opdracht, scope en bronnen
+3. Klantroutes en dienstverlening
+4. Bestaande en benodigde bedrijfsservices
+5. Oplossing in vijf lagen
+6. Uitwerking van nieuwe of gewijzigde bedrijfsservices
+7. Proces- en gegevensstromen
+8. Informatie en registers
+9. Architectuurbesluiten en beslisregels
+10. Privacy, beveiliging en kwaliteit
+11. Realisatie, deployment en beheer
+12. Acceptatie en open besluiten
+
+De inhoudseisen staan in `assets/architecture_structure.json`. AI-generatie vult per onderdeel bronverwijzingen en inhoud in; ontbrekende informatie wordt als open vraag gemarkeerd. Zonder AI ontstaat een eerste concept met bronfragmenten en expliciete nog uit te werken onderdelen. Een vaste indeling garandeert geen inhoudelijk volledig ontwerp. Bestaande concept-JSON zonder hoofdstukinhoud blijft bruikbaar; ontbrekende onderdelen worden zichtbaar gemaakt. Word-updates behouden de oorspronkelijke documentinhoud en voegen de twaalf hoofdstukken toe binnen de bestaande update-markers.
+
 ## Projectdocumenten en overige bronnen
 
 Onder de projectnaam en afbakening kun je één of meerdere PDF-, DOCX-, TXT- of Markdown-bestanden toevoegen. Vink per bestand aan of het mee moet in de architectuur. De zelfstandige HTML-app leest bestanden lokaal in de browser; hiervoor zijn geen Notion-koppeling, service-sleutel of installatie nodig. Exporteer een Notion-pagina desgewenst eerst als PDF of Markdown en voeg dat bestand toe. Scans zonder leesbare tekst vereisen een tekstversie.

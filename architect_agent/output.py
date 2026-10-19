@@ -5,7 +5,7 @@ from pathlib import Path
 
 import fitz
 
-from .schemas import validate
+from .schemas import validate, ARCHITECTURE_STRUCTURE
 
 STYLES = json.loads((Path(__file__).resolve().parents[1]/'assets/housestyles.json').read_text())
 
@@ -20,26 +20,41 @@ def report_sections(plan, sources):
     errors = validate(plan, sources)
     if errors:
         raise ValueError('; '.join(errors))
-    sections = [('Project en afbakening', [plan['scope']]),
-                ('Managementsamenvatting', [plan['management_summary']])]
-    for change in plan['changes']:
-        sections.append(('Architectuurkeuze: '+change['section'],
-                         [change['change'], 'Onderbouwing: '+change['rationale'],
-                          'Bron: '+', '.join(change['evidence'])]))
-    for layer in sorted(plan['layers'], key=lambda item: item['number'], reverse=True):
-        sections.append((f"Laag {layer['number']} — {layer['name']}", layer['components']))
-    sections.append(('Gegevensstroom', plan['flow_steps']))
-    adr = plan['adr']
-    sections.append(('ADR — '+adr['title'], ['Status: '+adr['status'], 'Context: '+adr['context'],
-                                           'Voorgesteld besluit: '+adr['decision']]))
-    for title, key in [('Principes', 'principles'), ('Implicaties', 'implications'),
-                       ('Zorgen', 'concerns'), ('Implementatie', 'implementation')]:
-        sections.append((title, adr[key]))
-    sections.append(('Samenhang met bestaande ADR’s', [adr['relation_existing_adrs']]))
-    sections.append(('Architectuurregels', [f"{rule['id']}: {rule['rule']} — {rule['status']}; bron: {', '.join(rule['evidence'])}" for rule in plan['decision_rules']]))
-    sections += [('Open besluiten', plan['open_decisions']), ('Aannames en controlepunten', plan['assumptions']),
-                 ('Bronnen', [source.reference for source in sources])]
+    content = plan.get('chapter_content', {})
+    sections = []
+    for chapter in ARCHITECTURE_STRUCTURE:
+        key = chapter['key']
+        lines = [entry['text'] + ('\nBron: ' + ', '.join(entry['evidence']) if entry['evidence'] else '')
+                 for entry in content.get(key, [])]
+        if not lines and key not in ('summary', 'scope', 'layers', 'flows', 'decisions'):
+            lines.append('Nog te bepalen op basis van bronanalyse en architectuurreview: ' + chapter['requirements'])
+        if key == 'summary':
+            lines.insert(0, plan['management_summary'])
+        elif key == 'scope':
+            lines.insert(0, 'Opdracht en afbakening: ' + plan['scope'])
+            for change in plan['changes']:
+                lines += ['Architectuurkeuze: ' + change['section'], change['change'],
+                          'Onderbouwing: ' + change['rationale'], 'Bron: ' + ', '.join(change['evidence'])]
+            lines += ['Bronnen en herleidbaarheid:'] + [source.reference for source in sources]
+        elif key == 'layers':
+            for layer in sorted(plan['layers'], key=lambda item: item['number'], reverse=True):
+                lines += [f"Laag {layer['number']} — {layer['name']}"] + layer['components']
+        elif key == 'flows':
+            lines += plan['flow_steps']
+        elif key == 'decisions':
+            adr = plan['adr']
+            lines += ['ADR — ' + adr['title'], 'Status: ' + adr['status'], 'Context: ' + adr['context'],
+                      'Besluit (voorgesteld): ' + adr['decision']]
+            for title, field in [('Principe', 'principles'), ('Implicatie', 'implications'),
+                                 ('Eventuele zorgen', 'concerns'), ('Implementatie', 'implementation')]:
+                lines += [title + ':'] + adr[field]
+            lines += ['Samenhang met bestaande ADR’s: ' + adr['relation_existing_adrs'], 'Architectuurregels:']
+            lines += [f"{rule['id']}: {rule['rule']} — {rule['status']}; bron: {', '.join(rule['evidence'])}" for rule in plan['decision_rules']]
+        elif key == 'acceptance':
+            lines += ['Open besluiten:'] + plan['open_decisions'] + ['Aannames en controlepunten:'] + plan['assumptions']
+        sections.append((chapter['title'], lines))
     return sections
+
 
 
 def report_html(plan, sources, brand, *, confluence=False):
