@@ -18,11 +18,11 @@ def package():
 Gebruik Genereer de architectuur om een brongebaseerd concept te maken.
 Alle hoofdstukken van de enterprise architectuur gaan mee.
 
-Epics: plak een Notion-epiclink of Teams-berichtlink en klik Epic ophalen.
-Naam en beschrijving worden via de lokale service opgehaald.
-Stel daarvoor de platformtoegang en service-sleutel in; zonder toegang volgt een foutmelding.
+Projectdocumenten en overige bronnen: voeg één of meerdere PDF-, DOCX-, TXT- of
+Markdown-bestanden toe bij de projectgegevens. Dit werkt lokaal zonder koppeling
+of service-sleutel. Vink per bestand aan of het moet worden meegenomen.
 
-Voor Notion-lezen, AI en publicatie is een lokaal ingestelde koppeling nodig.
+Alleen voor optionele AI en publicatie is een afzonderlijke koppeling nodig.
 Er zitten geen sleutels of privé-epics in dit bestand. Zie de repository-README:
 https://github.com/RvdKlip/Architectuuragent-Common-Ground-
 

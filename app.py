@@ -39,7 +39,7 @@ with st.sidebar:
         confluence_parent=st.text_input('Confluence bovenliggende pagina-ID (optioneel)',value=os.getenv('CONFLUENCE_PARENT_ID',''))
     st.markdown('<div class="workspace-note"><strong>Ontworpen voor onderbouwing.</strong>Van enterprise architectuur tot projectopdracht. Jij kiest de bronnen en beoordeelt het concept.</div>',unsafe_allow_html=True)
 
-selection=render_selection(notion_token)
+selection=render_selection()
 base=selection['base']
 documents=selection['documents']
 scope=selection['scope']

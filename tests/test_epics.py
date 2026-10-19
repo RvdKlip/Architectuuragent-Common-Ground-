@@ -65,20 +65,15 @@ def test_teams_link_validation(url):
     with pytest.raises(ValueError):validate_epic_link(url,'teams')
 
 
-def test_streamlit_link_resolves_details_and_invalidates_on_change():
-    epic = {'provider':'teams','id':'123','url':'https://teams.microsoft.com/l/message/test/123',
-            'title':'Testepic', 'text':'Gelezen beschrijving', 'mode':'connector'}
-    with patch('architect_agent.epics_ui.resolve_epic_link', return_value=epic) as resolve:
-        at = AppTest.from_file(str(Path(__file__).parents[1]/'app.py')).run(timeout=30)
-        assert not any(s.label == 'Bron van de epic' for s in at.selectbox)
-        at.text_input(key='epic_link').set_value(epic['url']).run()
-        next(b for b in at.button if b.label == 'Epic ophalen').click().run()
-        assert not at.exception
-        assert at.session_state['selected_epic']['text'] == epic['text']
-        assert any(i.value == epic['title'] and i.disabled for i in at.text_input)
-        resolve.assert_called_once()
-        at.text_input(key='epic_link').set_value('https://teams.microsoft.com/l/message/other/456').run()
-        assert not any('Geselecteerde-epic.md' in frame.value['Bron'].tolist() for frame in at.dataframe)
+def test_streamlit_replaces_epic_with_multiple_file_upload():
+    at = AppTest.from_file(str(Path(__file__).parents[1]/'app.py')).run(timeout=30)
+    assert not at.exception
+    assert not any('epic' in s.value.lower() for s in at.subheader)
+    assert not any(b.label == 'Epic ophalen' for b in at.button)
+    uploader = next(u for u in at.get('file_uploader') if u.key == 'project_sources')
+    assert uploader.proto.multiple_files
+    headings = [s.value for s in at.subheader]
+    assert headings.index('Projectdocumenten en overige bronnen') < headings.index('2. Bouw je fundament')
 
 
 def test_resolve_notion_link_uses_page_id():

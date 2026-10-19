@@ -1,15 +1,10 @@
 # Common Ground Architectuuragent
 
-## Epicselectie en delen via Teams
+## Projectdocumenten en overige bronnen
 
-De primaire knop heet **Genereer de architectuur**. Stap 1 toont altijd **Link naar epic**. Plak een link naar een afzonderlijke Notion-epic of een Teams-bericht en klik **Epic ophalen**. De app leidt de bron af uit de link en vult **Naam van de epic** en **Epicbeschrijving** automatisch in. Deze velden zijn alleen-lezen. Een gewijzigde link verwijdert de oude epic uit de bronselectie en maakt een bestaand concept verouderd.
+Onder de projectnaam en afbakening kun je één of meerdere PDF-, DOCX-, TXT- of Markdown-bestanden toevoegen. Vink per bestand aan of het mee moet in de architectuur. De zelfstandige HTML-app leest bestanden lokaal in de browser; hiervoor zijn geen Notion-koppeling, service-sleutel of installatie nodig. Exporteer een Notion-pagina desgewenst eerst als PDF of Markdown en voeg dat bestand toe. Scans zonder leesbare tekst vereisen een tekstversie.
 
-Het zelfstandige HTML-bestand gebruikt hiervoor `publication_service.py`: stel URL en service-sleutel in onder **Epic-koppeling instellen**. De service leest de link via een platform-API; hij neemt geen browsersessie over. De GitHub Pages-site alleen kan afgeschermde epics niet uitlezen.
-
-- Notion: stel `NOTION_TOKEN` in en geef de integratie toegang tot de epicdatabase. `NOTION_EPICS_DATABASE_ID` is standaard `e9375da1-9602-49bb-a23c-49d038d3c888`. Alleen epics uit die database worden gelezen. Een database- of weergavelink is geen afzonderlijke epic.
-- Teams: stel op de service een geldig `MICROSOFT_GRAPH_TOKEN` in met leesrechten voor het bericht (bijvoorbeeld gedelegeerde `ChannelMessage.Read.All` voor kanaalberichten of `Chat.Read` voor chats, afhankelijk van organisatierechten). Gebruik **Koppeling naar bericht kopiëren**. Vergader-, kanaal- en app-links worden niet als epic gelezen. Het token moet geldig blijven en wordt niet automatisch vernieuwd. Bij een bericht zonder onderwerp gebruikt de app de eerste tekstregel als naam.
-
-Ontbrekende toegang, een ongeschikte link of onleesbare inhoud geeft een foutmelding; de app verzint geen naam of beschrijving. Alleen na succesvol ophalen wordt `Geselecteerde-epic.md` als bron toegevoegd. Tests gebruiken gemockte platformresponsen; echte Notion- en Teams-toegang is niet live gevalideerd. Er worden geen epics gepubliceerd bij het ophalen.
+De sectie **Start vanuit een epic** en de bijbehorende link- en service-instellingen zijn verwijderd. AI-generatie en publicatie blijven afzonderlijke, optionele functies.
 
 ### Een index voor collega’s
 
@@ -19,7 +14,7 @@ Ontbrekende toegang, een ongeschikte link of onleesbare inhoud geeft een foutmel
 
 **GitHub Pages moet eenmalig worden ingeschakeld**: open de [repository-instellingen voor Pages](https://github.com/RvdKlip/Architectuuragent-Common-Ground-/settings/pages), kies **Deploy from a branch**, **main**, **/ (root)** en **Save**. De repository heeft `.nojekyll`; er is geen serverinstallatie nodig voor het appscherm. Het activeren kon vanuit deze omgeving niet worden uitgevoerd: de GitHub API wees de beschikbare toegang af. De website-URL is daarom een voorbereid adres, geen bevestigde live publicatie. Een raw GitHub-HTML-link is geen website. Teams kan een HTML-bijlage alleen als voorvertoning tonen of blokkeren; download/open in een browser of deel de Pages-link nadat de site beschikbaar is.
 
-Bouw beide bestanden en de ZIP met `.venv/bin/python scripts/package_app.py`. De ZIP bevat geen lokale uploads, privé-epics of serviceconfiguratie. De browserproef gebruikt gemockte Notion-epics en een synthetische Teams-link; er worden geen echte epics gelezen, AI-aanroepen gedaan of platformpagina’s gepubliceerd.
+Bouw beide bestanden en de ZIP met `.venv/bin/python scripts/package_app.py`. De ZIP bevat geen lokale uploads, privé-epics of serviceconfiguratie. De browserproef gebruikt lokale synthetische projectbestanden; er worden geen AI-aanroepen gedaan of platformpagina’s gepubliceerd.
 
 ## Projectarchitectuur: vernieuwd appscherm
 

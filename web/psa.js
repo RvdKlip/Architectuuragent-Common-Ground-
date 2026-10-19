@@ -5,7 +5,7 @@ const PA = (() => {
   const escape = text => String(text).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   function signature() {
     return JSON.stringify({project:$('project-name').value,goals:$('project-goals').value,type:$('project-type').value,
-      epic:Epic.current, documents:selectedDocuments(), chapters:[...remote.selected],
+      documents:selectedDocuments(), chapters:[...remote.selected],
       files:Object.values(files).flat().map(entry=>({name:entry.file.name,size:entry.file.size,modified:entry.file.lastModified,selected:entry.selected}))});
   }
   function stale() { return !!current && current.signature !== signature(); }
@@ -28,7 +28,6 @@ const PA = (() => {
     if(missing.length) throw Error('Voeg eerst inhoud toe voor: '+missing.map(category=>categories[category]).join(', '));
 
     if(sources.length>97) throw Error('Selecteer maximaal 97 bronbestanden voor één PA.');
-    const epic=Epic.document();if(epic)sources.push({...epic,contexts:[{source:epic.filename,text:epic.text}]});
     if(!sources.length)throw Error('Selecteer minstens één leesbare bron.');
     return sources.map((source,index)=>({...source,key:'B'+String(index).padStart(2,'0')}));
   }

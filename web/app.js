@@ -11,7 +11,6 @@ function selectedDocuments(){
  const result=[];
  if(isEnabled('enterprise')&&!files.enterprise.some(f=>f.selected)&&remote.text)result.push({name:'Enterprise-architectuur-volledig.md',category:'enterprise',url:remote.url,sha256:remote.sha256,retrieved_at:remote.retrieved_at,all_chapters:true});
  for(const [category,list]of Object.entries(files))if(isEnabled(category))for(const entry of list)if(entry.selected)result.push({name:entry.file.name,size:entry.file.size,category,reading:entry.reading,error:entry.error});
- if(typeof Epic!=='undefined'&&Epic.current)result.push({name:'Geselecteerde-epic.md',category:'epic',title:Epic.current.title,provider:Epic.current.provider,id:Epic.current.id,url:Epic.current.url,content_loaded:!!Epic.current.text.trim()});
  return result;
 }
 function render(){
