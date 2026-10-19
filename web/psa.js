@@ -151,3 +151,4 @@ const PA = (() => {
   return {checkFreshness,get current(){return current;},pdf,html};
 })();
 render();
+if(isEnabled('enterprise'))loadEnterprise();

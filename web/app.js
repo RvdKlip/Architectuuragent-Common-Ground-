@@ -37,10 +37,12 @@ document.querySelectorAll('input[type=file][data-category]').forEach(input=>inpu
  for(const entry of incoming)(async()=>{try{const result=await DocumentReader.read(entry.file);entry.contexts=result.contexts;entry.warnings=result.warnings;entry.pages=result.pages||1;}catch(error){entry.error=error.message;}finally{entry.reading=false;render();}})();
 }));
 for(const id of ['project-name','project-goals','project-type'])$(id).addEventListener('input',render);
-$('load-enterprise').addEventListener('click',async()=>{
+async function loadEnterprise(){
+ if(busy)return;
  busy=true;render();const message=$('enterprise-message');message.textContent='Volledige openbare bron ophalen…';const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),30000);
  try{const response=await fetch('https://raw.githubusercontent.com/ivorstenbosch-maker/EnterpriseArchitectuurCG/main/Enterprisearchitectuur-GPT.md',{signal:controller.signal,credentials:'omit'});if(!response.ok)throw Error('HTTP '+response.status);const buffer=await response.arrayBuffer();if(buffer.byteLength>3000000)throw Error('Bron te groot');const text=new TextDecoder('utf-8',{fatal:true}).decode(buffer);if(!text.startsWith('# ')||!text.slice(0,1000).includes('Enterprise Architectuur'))throw Error('Onverwacht bronformaat');remote.text=text;remote.sha256=await sha(text);remote.retrieved_at=new Date().toISOString();remote.selected=new Set(['all']);message.textContent='Volledige bron opgehaald. Alle hoofdstukken worden meegenomen.';$('load-enterprise').textContent='Bron vernieuwen ↻';}
  catch(error){message.textContent='Ophalen is niet gelukt. Controleer je internetverbinding of upload een eigen versie. Een eerder geladen bron blijft bewaard.';}
  finally{clearTimeout(timer);busy=false;render();}
-});
+}
+$('load-enterprise').addEventListener('click',loadEnterprise);
 // Eerste render volgt nadat de PA-module is geïnitialiseerd.

@@ -22,7 +22,7 @@ Open `index.html` door erop te dubbelklikken na het uitpakken van de ZIP. Het be
 
 ### Bronselectie
 
-- **Enterprise architectuur Platform Dienstverlening**: ophalen van de opgegeven openbare [GitHub-bron](https://github.com/ivorstenbosch-maker/EnterpriseArchitectuurCG/blob/main/Enterprisearchitectuur-GPT.md) of een eigen versie uploaden. **Alle hoofdstukken gaan volledig mee**, zonder hoofdstukkeuze of stilzwijgende inkorting. URL, ophaaldatum en SHA-256 blijven in de bronselectie vastgelegd.
+- **Enterprise architectuur Platform Dienstverlening**: wordt bij het openen van de zelfstandige app automatisch geladen. De knop vernieuwt de bron handmatig; bij een verbindingsfout kun je opnieuw proberen of een eigen versie uploaden. Ophalen van de opgegeven openbare [GitHub-bron](https://github.com/ivorstenbosch-maker/EnterpriseArchitectuurCG/blob/main/Enterprisearchitectuur-GPT.md) of een eigen versie uploaden. **Alle hoofdstukken gaan volledig mee**, zonder hoofdstukkeuze of stilzwijgende inkorting. URL, ophaaldatum en SHA-256 blijven in de bronselectie vastgelegd.
 - **Projectdocumenten en overige bronnen**: PDF, DOCX, TXT of Markdown lokaal uitlezen, met keuze per bestand. Niet-leesbare bronnen blokkeren generatie totdat ze zijn vervangen of uitgevinkt.
 
 De module Bouwstenen Rotterdam en de downloadknop voor de bronselectie zijn verwijderd uit de zelfstandige app en Streamlit. De afzonderlijke secties voor bouwblokkenadvies, bestaande ADR’s en privacy-/beveiligingskaders zijn verwijderd. De oudere adviesmodule en tests van de parsing blijven beschikbaar in de code, maar worden niet gebruikt in dit scherm en leveren geen vervangende Rotterdamse catalogus.
