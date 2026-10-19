@@ -14,7 +14,7 @@ def render_selection(notion_token="") -> dict:
     render_steps()
     st.markdown('<div id="project"></div>', unsafe_allow_html=True)
     with st.container(border=True):
-        st.subheader('1. Welk project start je?')
+        st.subheader('1. Voor welk project wil je een architectuur opstellen')
         left, right = st.columns([2, 1])
         with left:
             scope = st.text_input('Projectnaam', placeholder='Bijvoorbeeld: Signaalmanagement', key='project_name')
