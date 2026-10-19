@@ -17,6 +17,8 @@ def package():
 
 Gebruik Genereer de architectuur om een brongebaseerd concept te maken.
 Alle hoofdstukken van de enterprise architectuur gaan mee.
+Download na generatie het resultaat met Download als Word (.docx).
+De bestaande PDF- en HTML-downloads blijven beschikbaar.
 
 Projectdocumenten en overige bronnen: voeg één of meerdere PDF-, DOCX-, TXT- of
 Markdown-bestanden toe bij de projectgegevens. Dit werkt lokaal zonder koppeling

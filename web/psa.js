@@ -129,6 +129,7 @@ const PA = (() => {
       const candidate={brand,destinations,sources,plan,signature:sourceSignature};
       const preview=html(candidate,false);
       current=candidate;
+      $('word-status').textContent='';
       $('psa-preview').innerHTML=preview;$('psa-preview').style.color=styles[brand].ink;
       $('psa-result-meta').textContent='Huisstijl: '+brand+' · Gekozen uitvoer: '+destinations.join(', ')+' · '+method;
       $('download-psa-pdf').hidden=!destinations.includes('PDF');
@@ -141,6 +142,17 @@ const PA = (() => {
   });
   $('download-psa-pdf').addEventListener('click',()=>{if(current&&!stale())download(pdf(current),'application/pdf','PA-'+current.brand.replace(/ /g,'-')+'.pdf');else $('psa-stale').hidden=false;});
   $('download-psa-html').addEventListener('click',()=>{if(current&&!stale())download(html(current),'text/html','PA-'+current.brand.replace(/ /g,'-')+'.html');else $('psa-stale').hidden=false;});
+  $('download-psa-word').addEventListener('click',async()=>{
+    if(!current||stale()){$('psa-stale').hidden=false;return;}
+    const report=current,button=$('download-psa-word');button.disabled=true;$('word-status').textContent='Word-bestand wordt gemaakt…';
+    try{
+      const blob=await WordExport.create(report.plan.title,sections(report.plan,report.sources),report.brand,styles[report.brand]);
+      if(current!==report||stale()){$('psa-stale').hidden=false;$('word-status').textContent='Genereer eerst een nieuw concept voor de gewijzigde selectie.';return;}
+      download(blob,'application/vnd.openxmlformats-officedocument.wordprocessingml.document','PA-'+report.brand.replace(/ /g,'-')+'.docx');
+      $('word-status').textContent='Word-bestand gedownload.';
+    }catch(error){$('word-status').textContent='Word-bestand kon niet worden gemaakt. Probeer opnieuw.';}
+    finally{button.disabled=false;}
+  });
   $('approve-publication').addEventListener('change',checkFreshness);
   $('publish-psa').addEventListener('click',async()=>{
     if(!current||stale()||!$('approve-publication').checked)return;

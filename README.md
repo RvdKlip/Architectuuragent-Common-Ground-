@@ -1,5 +1,9 @@
 # Common Ground Architectuuragent
 
+## Download als Word
+
+Na generatie staat **Download als Word** naast de bestaande knoppen voor huisstijl, PDF en opgemaakte HTML. De knop maakt een echt `.docx`-bestand met de twaalf hoofdstukken, de volledige getoonde resultaattekst, bronverwijzingen en de gekozen huisstijl. Dit werkt lokaal in de browser, zonder service of installatie, ook vanuit de ZIP. Gewijzigde projectgegevens of bronnen vereisen eerst een nieuw concept.
+
 ## Vaste indeling van de gegenereerde architectuur
 
 Totdat de gebruiker een andere indeling vraagt, gebruiken de browserapp, AI-generatie en HTML-, PDF-, Word-, Notion- en Confluence-uitvoer dezelfde twaalf onderdelen:
