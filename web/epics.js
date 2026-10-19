@@ -1,7 +1,7 @@
 /* Read epic details from a link through the authenticated local service. */
 const Epic = (() => {
   let selected=null,revision=0;
-  const status=text=>$('epic-status').textContent=text;
+  function status(text){$('epic-status').textContent=text;$('epic-status').hidden=!text;}
   function refresh(){
     $('epic-selected').hidden=!selected;
     $('epic-title').value=selected?.title||'';
@@ -18,7 +18,7 @@ const Epic = (() => {
       if(link.protocol!=='https:'||link.username||link.password||link.port)throw Error('Gebruik een geldige HTTPS-link naar de epic.');
       const service=new URL($('epic-service-url').value);
       if(service.protocol!=='http:'||!['127.0.0.1','localhost'].includes(service.hostname)||service.port!=='8765'||service.username||service.password)throw Error('Gebruik de lokale epicservice http://127.0.0.1:8765.');
-      if(!$('epic-service-token').value)throw Error('Stel de lokale epicservice en service-sleutel in om de link te lezen.');
+      if(!$('epic-service-token').value){$('epic-connection').open=true;throw Error('Epic niet opgehaald: de koppeling is niet ingesteld. Start de lokale epicservice met toegang tot Notion of Teams en vul hieronder de service-sleutel in. De GitHub-website kan jouw ingelogde Notion-sessie niet gebruiken.');}
       const response=await fetch(service.origin+'/epics/get',{method:'POST',signal:controller.signal,headers:{'Content-Type':'application/json','Authorization':'Bearer '+$('epic-service-token').value},body:JSON.stringify({url:link.href})});
       const epic=await response.json();if(ticket!==revision)return;
       if(!response.ok)throw Error(epic.error||'Epic niet opgehaald.');
@@ -26,7 +26,7 @@ const Epic = (() => {
       selected={...epic,url:link.href};
       if(!$('project-name').value.trim())$('project-name').value=epic.title;
       status('Naam en beschrijving opgehaald.');refresh();
-    }catch(error){if(ticket===revision)status(['TypeError','AbortError'].includes(error.name)?'De lokale epicservice is niet bereikbaar. Controleer of deze draait en toegang tot de epic heeft.':error.message);}
+    }catch(error){if(ticket===revision){$('epic-connection').open=true;status(['TypeError','AbortError'].includes(error.name)?'De lokale epicservice is niet bereikbaar. Controleer of deze draait en toegang tot de epic heeft.':error.message);$('epic-status').scrollIntoView({block:'nearest'});}}
     finally{clearTimeout(timer);$('epic-use-link').disabled=false;}
   });
   $('epic-remove').addEventListener('click',()=>{revision++;selected=null;status('Epic verwijderd.');refresh();});
