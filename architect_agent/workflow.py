@@ -5,7 +5,6 @@ import json
 from .sources import collect
 from .schemas import validate
 from .ai import generate_plan
-from .diagram import render_layers, render_flow
 from .word import make_document
 
 
@@ -27,12 +26,18 @@ def prepare(base_doc:Path|None, sources:list[Path], scope:str, goals:str, model:
 
 def build(base_doc:Path, parsed:list, plan:dict, outdir:Path):
     outdir=Path(outdir);outdir.mkdir(parents=True,exist_ok=True)
-    layers_svg,layers_png=render_layers(plan,outdir/'architectuur_vijflagen')
-    flow_svg,flow_png=render_flow(plan,outdir/'gegevensstroom')
-    document=make_document(base_doc,plan,parsed,{'layers':layers_png,'flow':flow_png},outdir/'Solutionarchitectuur_bijgewerkt_concept.docx')
+    from .figures import report_figures
+    figures=report_figures(plan,'Common Ground');by_chapter={};figure_names=[];counts={}
+    for figure in figures:
+        kind=figure['kind'];counts[kind]=counts.get(kind,0)+1
+        name={'layers':'architectuur_vijflagen','flows':'gegevensstroom'}.get(kind,kind+'_'+str(counts[kind]))
+        svg=outdir/(name+'.svg');png=outdir/(name+'.png')
+        svg.write_text(figure['svg'],encoding='utf-8');png.write_bytes(figure['png'])
+        figure_names.extend([svg.name,png.name]);by_chapter.setdefault(figure['chapter'],[]).append({'path':png,'caption':figure['caption']})
+    document=make_document(base_doc,plan,parsed,{'by_chapter':by_chapter},outdir/'Solutionarchitectuur_bijgewerkt_concept.docx')
     (outdir/'concept_review.json').write_text(json.dumps(plan,indent=2,ensure_ascii=False),encoding='utf-8')
     manifest={
-       'document':document.name, 'figures':[layers_svg.name,layers_png.name,flow_svg.name,flow_png.name],
+       'document':document.name, 'figures':figure_names,
        'review_file':'concept_review.json', 'sources':[s.reference for s in parsed],
        'disclaimer':'CONCEPT: eerst broncheck en formele ADR-besluitvorming. Geen vervanging bestaande hoofdstukken.'
     }

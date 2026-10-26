@@ -4,6 +4,16 @@
 
 Na generatie staat **Download als Word** naast de bestaande knoppen voor huisstijl, PDF en opgemaakte HTML. De knop maakt een echt `.docx`-bestand met de twaalf hoofdstukken, de volledige getoonde resultaattekst, bronverwijzingen en de gekozen huisstijl. Dit werkt lokaal in de browser, zonder service of installatie, ook vanuit de ZIP. Gewijzigde projectgegevens of bronnen vereisen eerst een nieuw concept.
 
+## Architectuurplaten
+
+Elke uitwerking bevat platen bij de hoofdstukken Klantroutes (3), Bedrijfsservices (4), Vijf lagen (5), Realisatie van services (6) en Proces-/gegevensstromen (7). Per nieuwe of gewijzigde bedrijfsservice komt een aparte realisatieplaat met componenten, registers, processen en beslisregels. De vormgeving volgt de aangeleverde menukaart- en platformservicevoorbeelden; inhoud en onderwerp komen uit het gereviewde ontwerp, niet uit een vast Signaalmanagement-plaatje.
+
+De platen staan in het scherm, de zelfstandige HTML-download, PDF en Word. De browser maakt alle afbeeldingen lokaal. Word- en PDF-downloads hebben aparte liggende pagina’s voor de platen; de Python-workflow levert daarnaast SVG- en PNG-bestanden. Het model onderscheidt bestaand (met bronbewijs), aanpassen, nieuw voorgesteld, onbekend en buiten scope. Pijlen volgen expliciete relaties; laagplaatsing alleen bewijst geen koppeling. Zonder inhoudelijke bronanalyse of AI blijven ontbrekende onderdelen als open punten zichtbaar in de platen.
+
+Notion en Confluence ontvangen de tekstuele onderdelen en het diagrammodel als leesbare beschrijvingen; afbeeldingen worden daar nog niet automatisch geüpload. AI- en publicatiecontroles gebruiken mocks, geen betaalde API-aanroepen of echte publicaties.
+
+De projectnaam bepaalt de bestandsnaam van Word, PDF en HTML. Tekens die Windows niet toestaat worden aangepast. De Word-export verwijdert XML-ongeldige verborgen tekens uit brontekst; accenten, emoji en regeleinden blijven behouden.
+
 ## Vaste indeling van de gegenereerde architectuur
 
 Totdat de gebruiker een andere indeling vraagt, gebruiken de browserapp, AI-generatie en HTML-, PDF-, Word-, Notion- en Confluence-uitvoer dezelfde twaalf onderdelen:

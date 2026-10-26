@@ -15,7 +15,7 @@ from architect_agent.sources import collect
 from architect_agent.selection import write_documents
 from architect_agent.selection_ui import render_selection
 from architect_agent.presentation import apply_style, logo_data
-from architect_agent.output import report_pdf, report_html
+from architect_agent.output import report_pdf, report_html, project_filename
 from architect_agent.confluence import publish_plan as publish_confluence
 
 st.set_page_config(page_title='Architectuuragent · Projectarchitectuur',page_icon='🏛️',layout='wide')
@@ -119,8 +119,8 @@ if 'agent_plan_json' in st.session_state:
         output_plan=json.loads(modified)
         if output_pdf:
             pdf_bytes=report_pdf(output_plan,st.session_state['agent_sources'],brand)
-            st.download_button('Download PA als PDF — '+brand,pdf_bytes,file_name='PA-'+brand.replace(' ','-')+'.pdf',mime='application/pdf')
-        st.download_button('Download opgemaakte PA — '+brand,report_html(output_plan,st.session_state['agent_sources'],brand),file_name='PA-'+brand.replace(' ','-')+'.html',mime='text/html')
+            st.download_button('Download PA als PDF — '+brand,pdf_bytes,file_name=project_filename(st.session_state.get('agent_selection',{}).get('project') or scope,'pdf'),mime='application/pdf')
+        st.download_button('Download opgemaakte PA — '+brand,report_html(output_plan,st.session_state['agent_sources'],brand),file_name=project_filename(st.session_state.get('agent_selection',{}).get('project') or scope,'html'),mime='text/html')
     except Exception:
         st.info('Herstel de concept-JSON voordat je de PA-uitvoer downloadt.')
     if output_notion:
@@ -181,7 +181,7 @@ if 'agent_plan_json' in st.session_state:
 if 'result_zip' in st.session_state:
     st.subheader('3. Bestanden ophalen')
     a,b,c=st.columns(3)
-    a.download_button('Word · conceptupdate',st.session_state['result_docx'],'Solutionarchitectuur_bijgewerkt_concept.docx',mime='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+    a.download_button('Word · conceptupdate',st.session_state['result_docx'],project_filename(st.session_state.get('agent_selection',{}).get('project') or scope,'docx'),mime='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
     b.download_button('Architectuurplaat PNG',st.session_state['result_png'],'architectuur_vijflagen.png',mime='image/png')
     c.download_button('Alle bestanden ZIP',st.session_state['result_zip'],'architectuuragent_resultaat.zip',mime='application/zip')
     st.image(st.session_state['result_png'],caption='Architectuurplaat (ook beschikbaar als bewerkbare SVG in ZIP)')

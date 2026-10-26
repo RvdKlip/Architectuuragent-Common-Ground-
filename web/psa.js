@@ -2,6 +2,7 @@
 const PA = (() => {
   const styles = JSON.parse(document.getElementById('house-styles').textContent);
   const structure = JSON.parse(document.getElementById('architecture-structure').textContent);
+  const figureReference=JSON.parse(document.getElementById('diagram-reference').textContent);
   let current = null;
   const escape = text => String(text).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   function signature() {
@@ -86,19 +87,38 @@ const PA = (() => {
 
   function html(report,whole=true) {
     const style=styles[report.brand];
-    const body='<h1 class="result-heading" style="color:'+style.primary+'">'+escape(report.plan.title)+'</h1><div class="result-banner" style="background:'+style.pale+';border-color:'+style.primary+'">CONCEPT — ter beoordeling · Huisstijl: '+escape(report.brand)+'</div>'+sections(report.plan,report.sources).map(([title,lines])=>'<section class="result-section"><h2 style="color:'+style.primary+'">'+escape(title)+'</h2>'+lines.map(line=>'<p>'+escape(line)+'</p>').join('')+'</section>').join('');
+    const figures=report.figures||ArchitectureFigures.generate(report.plan,style,figureReference);
+    const body='<h1 class="result-heading" style="color:'+style.primary+'">'+escape(report.plan.title)+'</h1><div class="result-banner" style="background:'+style.pale+';border-color:'+style.primary+'">CONCEPT — ter beoordeling · Huisstijl: '+escape(report.brand)+'</div>'+sections(report.plan,report.sources).map(([title,lines],index)=>'<section class="result-section"><h2 style="color:'+style.primary+'">'+escape(title)+'</h2>'+figures.filter(f=>f.chapter===index+1).map(f=>'<figure class="architecture-figure" style="margin:20px 0;break-inside:avoid"><img style="width:100%;height:auto" src="'+f.url+'" alt="'+escape(f.title)+'"><figcaption>'+escape(f.caption)+'</figcaption></figure>').join('')+lines.map(line=>'<p>'+escape(line)+'</p>').join('')+'</section>').join('');
     if(!whole) return body;
     return '<!doctype html><html lang="nl"><head><meta charset="utf-8"><title>'+escape(report.plan.title)+'</title><style>body{font-family:'+style.font+';color:'+style.ink+';line-height:1.55;max-width:900px;margin:40px auto;padding:25px}h1{font-size:30px}h2{font-size:20px;break-after:avoid}p{white-space:pre-wrap}.result-banner{padding:15px;border-left:5px solid}.result-section{margin-top:24px}@media print{body{margin:0}section{break-inside:auto}}</style></head><body>'+body+'</body></html>';
   }
-  function pdf(report) {
+  async function figureImages(report){
+    if(!report.imagePromise)report.imagePromise=Promise.all(report.figures.map(ArchitectureFigures.rasterize)).catch(error=>{report.imagePromise=null;throw error;});
+    return report.imagePromise;
+  }
+  async function pdf(report) {
+    const figures=await figureImages(report);
     const doc=new jspdf.jsPDF({unit:'mm',format:'a4'}),style=styles[report.brand];
     const color=hex=>[1,3,5].map(index=>parseInt(hex.slice(index,index+2),16));
     const primary=color(style.primary),ink=color(style.ink);let y=24;
     function newPage(){doc.addPage();y=24;}
     function text(value,size=10,bold=false){doc.setFont('helvetica',bold?'bold':'normal');doc.setFontSize(size);doc.setTextColor(...ink);const lines=doc.splitTextToSize(String(value).replace(/\u00a0/g,' '),174);for(const line of lines){if(y>272)newPage();doc.text(line,18,y);y+=size*.47;}y+=3;}
     doc.setFillColor(...primary);doc.rect(0,0,210,5,'F');text(report.plan.title,21,true);text('CONCEPT — ter beoordeling · Huisstijl: '+report.brand,10,true);
-    for(const [title,lines] of sections(report.plan,report.sources)){if(y>254)newPage();y+=3;doc.setDrawColor(...primary);doc.line(18,y,192,y);y+=7;text(title,13,true);for(const line of lines)text(line);}
-    const pages=doc.getNumberOfPages();for(let page=1;page<=pages;page++){doc.setPage(page);doc.setFillColor(...primary);doc.rect(0,0,210,5,'F');doc.setTextColor(...primary);doc.setFontSize(8);doc.text(report.brand+' | CONCEPT | '+page+'/'+pages,18,287);}
+    const chapters=sections(report.plan,report.sources);
+    for(const [index,[title,lines]] of chapters.entries()){
+      if(y>254)newPage();y+=3;doc.setDrawColor(...primary);doc.line(18,y,192,y);y+=7;text(title,13,true);for(const line of lines)text(line);
+      const pictures=figures.filter(f=>f.chapter===index+1);
+      for(const figure of pictures){
+        doc.addPage('a4','landscape');doc.setFont('helvetica','bold');doc.setFontSize(14);doc.setTextColor(...ink);
+        const titles=doc.splitTextToSize(figure.title,265);doc.text(titles,14,17);const top=24+titles.length*5;
+        doc.setFont('helvetica','normal');doc.setFontSize(8);const caption=doc.splitTextToSize(figure.caption,265);
+        const scale=Math.min(267/figure.width,(180-top-caption.length*4)/figure.height);
+        doc.addImage(figure.png,'PNG',14,top,figure.width*scale,figure.height*scale);
+        doc.text(caption,14,top+figure.height*scale+7);
+      }
+      if(pictures.length&&index<chapters.length-1){doc.addPage('a4','portrait');y=24;}
+    }
+    const pages=doc.getNumberOfPages();for(let page=1;page<=pages;page++){doc.setPage(page);doc.setFillColor(...primary);doc.rect(0,0,doc.internal.pageSize.getWidth(),5,'F');doc.setTextColor(...primary);doc.setFontSize(8);doc.text(report.brand+' | CONCEPT | '+page+'/'+pages,18,doc.internal.pageSize.getHeight()-10);}
     return doc.output('arraybuffer');
   }
   function download(content,type,name){const url=URL.createObjectURL(new Blob([content],{type}));const link=document.createElement('a');link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
@@ -126,7 +146,8 @@ const PA = (() => {
         if(!result.plan||!Array.isArray(result.plan.layers)||!result.plan.adr)throw Error('Geen geldige PA van de AI-service ontvangen.');
         plan=result.plan;method='AI-synthese van de geselecteerde bronnen — ter review.';
       }
-      const candidate={brand,destinations,sources,plan,signature:sourceSignature};
+      const candidate={brand,destinations,sources,plan,projectName:$('project-name').value.trim(),signature:sourceSignature};
+      candidate.figures=ArchitectureFigures.generate(plan,styles[brand],figureReference);
       const preview=html(candidate,false);
       current=candidate;
       $('word-status').textContent='';
@@ -140,15 +161,22 @@ const PA = (() => {
     } catch(error){$('psa-options-error').textContent=error.message;}
     finally{$('confirm-generate').disabled=false;}
   });
-  $('download-psa-pdf').addEventListener('click',()=>{if(current&&!stale())download(pdf(current),'application/pdf','PA-'+current.brand.replace(/ /g,'-')+'.pdf');else $('psa-stale').hidden=false;});
-  $('download-psa-html').addEventListener('click',()=>{if(current&&!stale())download(html(current),'text/html','PA-'+current.brand.replace(/ /g,'-')+'.html');else $('psa-stale').hidden=false;});
+  $('download-psa-pdf').addEventListener('click',async()=>{
+    if(!current||stale()){$('psa-stale').hidden=false;return;}
+    const report=current,button=$('download-psa-pdf');button.disabled=true;
+    try{const content=await pdf(report);if(current===report&&!stale())download(content,'application/pdf',WordExport.filename(report.projectName,'pdf'));else $('psa-stale').hidden=false;}
+    catch(error){$('word-status').textContent='PDF kon niet worden gemaakt. Probeer opnieuw.';}
+    finally{button.disabled=false;}
+  });
+  $('download-psa-html').addEventListener('click',()=>{if(current&&!stale())download(html(current),'text/html',WordExport.filename(current.projectName,'html'));else $('psa-stale').hidden=false;});
   $('download-psa-word').addEventListener('click',async()=>{
     if(!current||stale()){$('psa-stale').hidden=false;return;}
     const report=current,button=$('download-psa-word');button.disabled=true;$('word-status').textContent='Word-bestand wordt gemaakt…';
     try{
-      const blob=await WordExport.create(report.plan.title,sections(report.plan,report.sources),report.brand,styles[report.brand]);
+      const pictures=await figureImages(report);
+      const blob=await WordExport.create(report.plan.title,sections(report.plan,report.sources),report.brand,styles[report.brand],pictures);
       if(current!==report||stale()){$('psa-stale').hidden=false;$('word-status').textContent='Genereer eerst een nieuw concept voor de gewijzigde selectie.';return;}
-      download(blob,'application/vnd.openxmlformats-officedocument.wordprocessingml.document','PA-'+report.brand.replace(/ /g,'-')+'.docx');
+      download(blob,'application/vnd.openxmlformats-officedocument.wordprocessingml.document',WordExport.filename(report.projectName,'docx'));
       $('word-status').textContent='Word-bestand gedownload.';
     }catch(error){$('word-status').textContent='Word-bestand kon niet worden gemaakt. Probeer opnieuw.';}
     finally{button.disabled=false;}

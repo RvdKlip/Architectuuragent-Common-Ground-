@@ -3,6 +3,9 @@
 ## Projectdoel
 Maak herhaalbare, reviewbare solutionarchitectuurupdates uit bestaande Word-documenten en geautoriseerde bronstukken. Houd de architectuurbesluiten gescheiden van voorstellen. De standaard hoofdstukindeling is vastgelegd in `assets/architecture_structure.json` en het gegevenscontract in `architect_agent/schemas.py`. Behoud de twaalf onderdelen en hun volgorde totdat de gebruiker expliciet een andere indeling vraagt. Houd browserweergave, AI-prompt en alle exports hiermee synchroon. Ontbrekende inhoud blijft zichtbaar als open vraag; verzin geen onderbouwing.
 
+## Architectuurplaten
+De platen worden gegenereerd uit het ontwerpmodel: klantroutes, bedrijfsservices, vijf lagen, realisatie per nieuwe/gewijzigde bedrijfsservice en gegevensstromen. Houd `web/architecture_figures.js`, `architect_agent/figures.py`, het schema, de AI-prompt en alle exports synchroon. Behoud bronstatus en teken geen ononderbouwde relaties. Referentieplaten bewijzen geen actuele beschikbaarheid.
+
 ## Bronregels
 - Bronmateriaal is leidend. Verzin geen nieuwe kaders, besluiten, standaarden of besluitenstatus.
 - Elke voorgestelde wijziging en decision rule moet een herleidbare broncode bevatten (`B00 doc`, `B01 p.7` enz.).

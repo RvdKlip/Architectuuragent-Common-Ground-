@@ -1,0 +1,80 @@
+{
+  "source_notes": [
+    "Vormgevingsreferentie: Menukaart Klantroute, concept 16-06-2026.",
+    "Vormgevingsreferentie: Bedrijfsservice Ontvangen, Registreren, Doorverwijzen, 21-09-2026.",
+    "Referentieplaten bewijzen geen actuele beschikbaarheid of toepasbaarheid op een project."
+  ],
+  "route_steps": [
+    "Attenderen / signalerend informeren",
+    "Vraaggestuurd informeren",
+    "Vraagverheldering",
+    "Advisering",
+    "(eerste) Beoordeling",
+    "Ontvangen",
+    "Registreren",
+    "Doorverwijzen",
+    "Behandelen",
+    "Informeren (voortgang)",
+    "Leveren",
+    "Evalueren",
+    "Toezicht houden"
+  ],
+  "layouts": {
+    "customer_routes": {
+      "chapter": 3,
+      "title": "Klantroutes en dienstverlening",
+      "groups": [
+        "Klantbehoefte",
+        "Klantroutestappen",
+        "Bedrijfsservices"
+      ]
+    },
+    "business_services": {
+      "chapter": 4,
+      "title": "Platformdienstverlening — hergebruik en toevoegingen",
+      "groups": [
+        "Bestaand",
+        "Aanpassen",
+        "Nieuw voorgesteld",
+        "Nog te bepalen"
+      ]
+    },
+    "service_design": {
+      "chapter": 6,
+      "title": "Realisatie van bedrijfsservices",
+      "groups": [
+        "Bedrijfsservice",
+        "Solutioncomponenten",
+        "Registers en gegevens",
+        "Processen en beslisregels"
+      ]
+    }
+  },
+  "statuses": {
+    "existing": {
+      "label": "Bestaand (volgens bron)",
+      "color": "#6F9F49",
+      "fill": "#EAF5E2"
+    },
+    "change": {
+      "label": "Aanpassen — voorstel",
+      "color": "#C17E11",
+      "fill": "#FFF3CD"
+    },
+    "new": {
+      "label": "Nieuw — voorstel",
+      "color": "#207F9A",
+      "fill": "#E9F5FA"
+    },
+    "unknown": {
+      "label": "Nog te bepalen / te toetsen",
+      "color": "#768390",
+      "fill": "#F2F5F7"
+    },
+    "out_of_scope": {
+      "label": "Buiten scope",
+      "color": "#8C8193",
+      "fill": "#F3EFF5"
+    }
+  }
+}

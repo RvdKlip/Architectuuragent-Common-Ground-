@@ -17,7 +17,15 @@ def array(schema: dict) -> dict:
 
 STR = {"type": "string"}
 STR_LIST = array(STR)
+DIAGRAM_SCHEMA = object_schema({
+    'kind': {'type':'string','enum':['customer_routes','business_services','service_design']},
+    'title': STR, 'service_id': STR,
+    'nodes': array(object_schema({'id':STR, 'label':STR, 'group':STR,
+        'status':{'type':'string','enum':['existing','change','new','unknown','out_of_scope']}, 'evidence':STR_LIST})),
+    'edges': array(object_schema({'from':STR,'to':STR,'label':STR,'evidence':STR_LIST})),
+})
 UPDATE_SCHEMA = object_schema({
+    "diagrams": array(DIAGRAM_SCHEMA),
     "chapter_content": object_schema({chapter["key"]: {**array(object_schema({"text": STR, "evidence": STR_LIST})), "minItems": 1} for chapter in ARCHITECTURE_STRUCTURE}),
     "title": STR,
     "scope": STR,
@@ -41,7 +49,7 @@ def validate(plan: dict, sources: list | None = None) -> list[str]:
     errors = []
     required = UPDATE_SCHEMA['required']
     for key in required:
-        if key != 'chapter_content' and key not in plan:
+        if key not in ('chapter_content','diagrams') and key not in plan:
             errors.append(f"Ontbrekend hoofdveld: {key}")
     if errors:
         return errors
@@ -77,6 +85,36 @@ def validate(plan: dict, sources: list | None = None) -> list[str]:
                         errors.append(f'Ongeldige hoofdstukinhoud: {key}')
                     else:
                         evidence.extend(entry['evidence'])
+    if 'diagrams' in plan:
+        diagrams=plan['diagrams']
+        kinds={'customer_routes','business_services','service_design'}
+        if not isinstance(diagrams,list) or not kinds <= {d.get('kind') for d in diagrams if isinstance(d,dict)}:
+            errors.append('Diagrammen voor klantroutes, bedrijfsservices en servicerealisatie zijn verplicht')
+        if isinstance(diagrams,list):
+            service_ids=set(); designed=set()
+            for diagram in diagrams:
+                if not isinstance(diagram,dict) or diagram.get('kind') not in kinds or (not isinstance(diagram.get('title'),str) or not diagram['title'].strip()) or not isinstance(diagram.get('nodes'),list) or not isinstance(diagram.get('edges'),list) or not isinstance(diagram.get('service_id'),str):
+                    errors.append('Ongeldig diagrammodel');continue
+                nodes=diagram['nodes'];ids=set()
+                if not nodes:errors.append('Een diagram moet onderdelen of expliciete open punten bevatten')
+                for node in nodes:
+                    if not isinstance(node,dict) or not all(isinstance(node.get(k),str) and node[k].strip() for k in ('id','label','group')) or node.get('status') not in ('existing','change','new','unknown','out_of_scope') or not isinstance(node.get('evidence'),list) or not all(isinstance(c,str) for c in node['evidence']):
+                        errors.append('Ongeldig diagramonderdeel');continue
+                    if node['id'] in ids:errors.append('Dubbel diagram-ID: '+node['id'])
+                    ids.add(node['id']);evidence.extend(node['evidence'])
+                    if node['status'] in ('existing','change','new') and not node['evidence']:
+                        errors.append('Beschikbaarheid of ontwerpvoorstel vereist bronbewijs: '+node['label'])
+                    if diagram['kind']=='business_services' and node['status'] in ('new','change'):
+                        service_ids.add(node['id'])
+                for edge in diagram['edges']:
+                    if not isinstance(edge,dict) or edge.get('from') not in ids or edge.get('to') not in ids or not isinstance(edge.get('label'),str) or not isinstance(edge.get('evidence'),list) or not all(isinstance(c,str) for c in edge['evidence']):
+                        errors.append('Ongeldige diagramrelatie');continue
+                    if not edge['evidence']:errors.append('Diagramrelatie vereist een bronverwijzing')
+                    evidence.extend(edge['evidence'])
+                if diagram['kind']=='service_design' and diagram['service_id']:
+                    designed.add(diagram['service_id'])
+            if service_ids-designed:
+                errors.append('Realisatieplaat ontbreekt voor nieuwe/gewijzigde bedrijfsservice: '+', '.join(sorted(service_ids-designed)))
     known = {s.key: s.pages for s in sources or []}
     for cite in evidence:
         match = re.search(r'\b(B\d\d)(?:\s+p\.?\s*(\d+)|\s+doc|\s+tekst)?\b', cite, flags=re.I)

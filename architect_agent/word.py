@@ -51,7 +51,8 @@ def marker(doc, text):
 
 def para(doc, text, style=None):
     p=doc.add_paragraph(style=style) if style else doc.add_paragraph()
-    p.add_run(text)
+    from .figures import clean
+    p.add_run(clean(text))
     return p
 
 
@@ -102,7 +103,8 @@ def image(doc, location, caption):
     p.add_run().add_picture(str(location), width=Cm(max_width))
     cp=doc.add_paragraph()
     cp.alignment=WD_ALIGN_PARAGRAPH.CENTER
-    r=cp.add_run(caption)
+    from .figures import clean
+    r=cp.add_run(clean(caption))
     r.italic=True; r.font.size=Pt(8)
 
 
@@ -119,7 +121,10 @@ def make_document(base_doc: Path, plan: dict, sources: list, figures: dict, dest
     from .output import report_sections
     for index, (title, lines) in enumerate(report_sections(plan, sources), 1):
         doc.add_heading(title, 2)
-        if index == 5:
+        if 'by_chapter' in figures:
+            for figure in figures['by_chapter'].get(index,[]):
+                image(doc,figure['path'],figure['caption'])
+        elif index == 5:
             image(doc, figures['layers'], 'Positionering binnen het vijflagenmodel van Platform Dienstverlening — concept.')
         elif index == 7:
             image(doc, figures['flow'], 'Voorgestelde proces- en gegevensstroom — concept; toetsen aan bron- en privacyafspraken.')

@@ -61,6 +61,19 @@ def generate_plan(sources: list[Source], scope: str, goals: str, model: str | No
                'Bij ontbrekende informatie: schrijf Nog te bepalen, noem de ontbrekende bron of beslissing, '
                'de verantwoordelijke en het beslismoment als die bekend zijn. Verzin geen details. '
                'Deze vaste structuur blijft de standaard totdat de gebruiker later een andere indeling vraagt.')
+    from pathlib import Path
+    reference=json.loads((Path(__file__).resolve().parents[1]/'assets/diagram_reference.json').read_text())
+    prompt += ('\n\nPLATEN: vul diagrams met onderwerpgerichte klantroute(s), een overzicht van bestaande/gewijzigde/nieuwe bedrijfsservices '
+               'en een aparte service_design per nieuwe of gewijzigde bedrijfsservice. service_id verwijst naar het node-id in business_services; '
+               'voor overzichtsplaten is service_id leeg. Onderscheid bedrijfsservices van technische API-diensten. '
+               'Koppel de nodes met expliciete edges; verzin geen procesvolgorde of koppelingen. Onderbouw toepasbaarheid en '
+               'bestaande beschikbaarheid met de projectbronnen. Een naam in een referentieplaat bewijst geen lokale inzetbaarheid. '
+               'Iedere pijl en ieder bestaand/nieuw/aan te passen onderdeel heeft bronverwijzingen in evidence. Ontbreekt onderbouwing, gebruik dan status unknown en laat de relatie open. '
+               'Nieuwe ontwerpen heten voorstel, onbekende aspecten krijgen status unknown. Gebruik bestaande registers waar passend; '
+               'verzin geen nieuw register om een plaat op te vullen. Geef bij service_design de solutioncomponenten, registers, '
+               'processen en beslisregels weer. Bij ontbrekende bronnen blijven open punten zichtbaar in de plaat. '
+               'Lagen en gegevensstromen worden ook automatisch als plaat weergegeven uit layers en flow_steps. '
+               'Vormgevings- en menukaartreferentie (geen bewijs voor projectspecifieke claims): '+json.dumps(reference,ensure_ascii=False))
     client = OpenAI()
     response = client.responses.create(
         model=model,

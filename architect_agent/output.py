@@ -1,6 +1,8 @@
 """Huisstijl en inhoudelijke PSA-uitvoer, onafhankelijk van de publicatiebestemming."""
 from html import escape
 import json
+import re
+import unicodedata
 from pathlib import Path
 
 import fitz
@@ -8,6 +10,16 @@ import fitz
 from .schemas import validate, ARCHITECTURE_STRUCTURE
 
 STYLES = json.loads((Path(__file__).resolve().parents[1]/'assets/housestyles.json').read_text())
+
+
+def project_filename(project,extension):
+    from .figures import clean
+    name=unicodedata.normalize('NFC',clean(project))
+    name=re.sub(r'[<>:"/\\|?*\x00-\x1f\x7f-\x9f]','_',name).strip()
+    name=re.sub(r'\.(docx|pdf|html)$','',name,flags=re.I).rstrip('. ')
+    name=name[:120].rstrip('. ') or 'Projectarchitectuur'
+    if re.match(r'^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\.|$)',name,re.I):name='Project-'+name
+    return name+'.'+extension
 
 
 def house_style(name):
@@ -52,6 +64,14 @@ def report_sections(plan, sources):
             lines += [f"{rule['id']}: {rule['rule']} — {rule['status']}; bron: {', '.join(rule['evidence'])}" for rule in plan['decision_rules']]
         elif key == 'acceptance':
             lines += ['Open besluiten:'] + plan['open_decisions'] + ['Aannames en controlepunten:'] + plan['assumptions']
+        for diagram in plan.get('diagrams',[]):
+            from .figures import REFERENCE
+            if REFERENCE['layouts'][diagram['kind']]['chapter']==len(sections)+1:
+                lines.append('Plaat: '+diagram['title'])
+                for node in diagram['nodes']:
+                    lines.append(node['label']+' — '+node['group']+'; '+REFERENCE['statuses'][node['status']]['label']+('; bron: '+', '.join(node['evidence']) if node['evidence'] else ''))
+                for edge in diagram['edges']:
+                    lines.append('Relatie: '+edge['from']+' → '+edge['to']+' '+edge['label']+('; bron: '+', '.join(edge['evidence']) if edge['evidence'] else ''))
         sections.append((chapter['title'], lines))
     return sections
 
@@ -61,8 +81,16 @@ def report_html(plan, sources, brand, *, confluence=False):
     style = house_style(brand)
     sections = report_sections(plan, sources)
     title = escape(plan['title'])
-    content = ''.join('<h2>'+escape(title)+'</h2>'+''.join('<p>'+escape(str(line))+'</p>' for line in lines)
-                      for title, lines in sections)
+    from .figures import report_figures
+    import base64
+    figures=[] if confluence else report_figures(plan,brand)
+    content=''
+    for index,(heading,lines) in enumerate(sections,1):
+        content+='<h2>'+escape(heading)+'</h2>'
+        for figure in figures:
+            if figure['chapter']==index:
+                content+='<figure style="margin:20px 0;page-break-inside:avoid"><img style="width:100%;height:auto" src="data:image/png;base64,'+base64.b64encode(figure['png']).decode()+'" alt="'+escape(figure['title'])+'"><figcaption>'+escape(figure['caption'])+'</figcaption></figure>'
+        content+=''.join('<p>'+escape(str(line))+'</p>' for line in lines)
     banner = '<p><strong>CONCEPT — ter beoordeling</strong> · Huisstijl: '+escape(brand)+'</p>'
     if confluence:
         banner = ('<ac:structured-macro ac:name="panel"><ac:parameter ac:name="bgColor">'+style['pale']+

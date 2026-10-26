@@ -45,14 +45,14 @@ def test_repeat_replaces_only_previous_addition(tmp_path):
     full='\n'.join(p.text for p in doc.paragraphs)
     assert 'Oorspronkelijke tekst mag niet verdwijnen' in full
     assert START in full and END in full
-    assert len(doc.inline_shapes)==2
+    assert len(doc.inline_shapes)==5
     out2=tmp_path/'run2';build(out/'Solutionarchitectuur_bijgewerkt_concept.docx',parsed,plan,out2)
     doc2=Document(out2/'Solutionarchitectuur_bijgewerkt_concept.docx')
     full2='\n'.join(p.text for p in doc2.paragraphs)
     assert full2.count(START)==1
     assert full2.count(END)==1
     assert full2.count('Architectuurupdate — concept ter review')==1
-    assert len(doc2.inline_shapes)==2
+    assert len(doc2.inline_shapes)==5
     assert (out2/'architectuur_vijflagen.svg').exists()
     assert (out2/'gegevensstroom.png').exists()
 

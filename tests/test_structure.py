@@ -67,7 +67,7 @@ def test_new_chapter_content_is_validated_and_preserved_in_exports(tmp_path):
     doc = Document(output/manifest['document'])
     assert [p.text for p in doc.paragraphs if p.style.name == 'Heading 2'] == TITLES
     assert 'Bestaande inhoud behouden' in [p.text for p in doc.paragraphs]
-    assert len(doc.inline_shapes) == 2
+    assert len(doc.inline_shapes) == 5
     assert any(p.text == 'Uitwerking information\nBron: B01 p.7' for p in doc.paragraphs)
 
 
