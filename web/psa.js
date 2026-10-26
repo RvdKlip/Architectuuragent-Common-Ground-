@@ -132,7 +132,7 @@ const PA = (() => {
       if(!$('project-name').value.trim()||!$('project-goals').value.trim())throw Error('Vul eerst een projectnaam en doel/afbakening in.');
       const brand=document.querySelector('input[name=brand]:checked').value;
       const destinations=[...document.querySelectorAll('input[name=destination]:checked')].map(input=>input.value);
-      if(!destinations.length)throw Error('Kies PDF, Confluence en/of Notion.');
+      if(!destinations.length)throw Error('Kies Word, PDF, Confluence en/of Notion.');
       const sources=inputs(),sourceSignature=signature();let plan=makePlan(sources),method='Brongetrouw eerste concept zonder AI.';
       if($('generation-ai').checked){
         if(!$('generation-consent').checked)throw Error('Bevestig dat deze bronnen naar de ingestelde AI-dienst mogen.');
@@ -154,9 +154,10 @@ const PA = (() => {
       $('psa-preview').innerHTML=preview;$('psa-preview').style.color=styles[brand].ink;
       $('psa-result-meta').textContent='Huisstijl: '+brand+' · Gekozen uitvoer: '+destinations.join(', ')+' · '+method;
       $('download-psa-pdf').hidden=!destinations.includes('PDF');
-      $('publication-section').hidden=!destinations.some(target=>target!=='PDF');
+      $('download-psa-word').hidden=!destinations.includes('Word');
+      $('publication-section').hidden=!destinations.some(target=>['Notion','Confluence'].includes(target));
       $('approve-publication').checked=false;$('publish-psa').disabled=true;$('publication-results').replaceChildren();
-      $('publication-status').textContent='Nog niet gepubliceerd. Gekozen: '+destinations.filter(target=>target!=='PDF').join(', ')+'. Stel de koppeling in en bevestig de review.';
+      $('publication-status').textContent='Nog niet gepubliceerd. Gekozen: '+destinations.filter(target=>['Notion','Confluence'].includes(target)).join(', ')+'. Stel de koppeling in en bevestig de review.';
       $('psa-stale').hidden=true;$('psa-result').hidden=false;checkFreshness();$('psa-dialog').close();$('psa-result').scrollIntoView({behavior:'smooth'});
     } catch(error){$('psa-options-error').textContent=error.message;}
     finally{$('confirm-generate').disabled=false;}
@@ -190,7 +191,7 @@ const PA = (() => {
     if(!$('publication-token').value){status.textContent='Nog niet gepubliceerd. Vul de publicatieservice-sleutel in; platformtokens blijven op de server.';return;}
     $('publish-psa').disabled=true;status.textContent='Publicatie wordt aangevraagd…';
     try{
-      const response=await fetch(url.origin+'/publish',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+$('publication-token').value},body:JSON.stringify({plan:current.plan,brand:current.brand,sources:current.sources.map(source=>({key:source.key,filename:source.filename,pages:source.pages})),reviewed:true,destinations:current.destinations.filter(target=>target!=='PDF')})});
+      const response=await fetch(url.origin+'/publish',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+$('publication-token').value},body:JSON.stringify({plan:current.plan,brand:current.brand,sources:current.sources.map(source=>({key:source.key,filename:source.filename,pages:source.pages})),reviewed:true,destinations:current.destinations.filter(target=>['Notion','Confluence'].includes(target))})});
       const result=await response.json();if(!response.ok)throw Error(result.error||'Publicatie niet bevestigd.');
       $('publication-results').replaceChildren();let count=0;
       for(const [target,item] of Object.entries(result.results)){
