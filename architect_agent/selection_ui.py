@@ -1,5 +1,7 @@
 """Selecteer bronnen voor een projectarchitectuur; enterprise architectuur altijd volledig."""
 import hashlib
+import json
+from .horizzon_mcp import MCP_URL, discover, read_source, HorizzonError
 import streamlit as st
 from .catalogue import CACHE, ENTERPRISE_GITHUB, ENTERPRISE_GITBOOK, load_enterprise
 from .selection import SOURCE_OPTIONS, SelectedDocument, missing_sources
@@ -68,6 +70,51 @@ def render_selection() -> dict:
             uploaded = st.file_uploader('Eigen versie uploaden', type=['pdf', 'docx', 'txt', 'md'], key='files_enterprise', disabled=not enabled)
             if uploaded and enabled:
                 documents.append(SelectedDocument('enterprise', uploaded.name, uploaded.getvalue()))
+    with st.container(border=True):
+        use_horizzon = st.checkbox(SOURCE_OPTIONS[1].title, value=True, key='use_horizzon')
+        if use_horizzon:
+            selected.append('horizzon')
+        st.caption('Gebruik bestaande architecturen, componenten, relaties en kaders naast de enterprise architectuur.')
+        st.caption('MCP-bron: ' + MCP_URL)
+        st.caption('Toegangsgegevens worden uitsluitend op de server ingesteld. Zie README: Horizzon configureren.')
+        if st.button('Verbind met Horizzon', disabled=not use_horizzon):
+            try:
+                st.session_state['horizzon_tools'] = discover()['tools']
+                st.success('Verbonden. Haal nu relevante architectuurinhoud op.')
+            except HorizzonError as error:
+                st.session_state.pop('horizzon_tools', None)
+                st.error(str(error))
+        tools = st.session_state.get('horizzon_tools', [])
+        if tools and use_horizzon:
+            names = [t['name'] for t in tools]
+            name = st.selectbox('Horizzon-leesfunctie', names, key='horizzon_tool')
+            tool = next(t for t in tools if t['name'] == name)
+            st.caption(tool.get('description', ''))
+            with st.expander('Parameters van deze leesfunctie'):
+                st.json(tool.get('inputSchema', {}))
+            params = st.text_area('Leesparameters (JSON volgens de gekozen functie)', value='{}', key='horizzon_args_' + name)
+            confirmed = tool.get('annotations', {}).get('readOnlyHint') is True
+            if not confirmed:
+                confirmed = st.checkbox('Ik heb gecontroleerd dat deze functie uitsluitend informatie leest.', key='horizzon_read_' + name)
+            if st.button('Voeg Horizzon-resultaat toe als bron'):
+                try:
+                    data = read_source(name, json.loads(params), confirmed)
+                    snapshots = st.session_state.setdefault('horizzon_snapshots', [])
+                    data['name'] = data['name'].replace('.md', f'-{len(snapshots)+1}.md')
+                    snapshots.append(data)
+                except (HorizzonError, json.JSONDecodeError) as error:
+                    st.error(str(error) if isinstance(error, HorizzonError) else 'Ongeldige JSON bij de leesparameters.')
+        horizzon_metadata = []
+        for index, snapshot in enumerate(st.session_state.get('horizzon_snapshots', [])):
+            keep = st.checkbox(snapshot['name'], value=True, key=f'horizzon_snapshot_{index}', disabled=not use_horizzon)
+            st.caption(snapshot['retrieved_at'])
+            with st.expander('Opgehaalde inhoud bekijken: ' + snapshot['name']):
+                st.text(snapshot['text'])
+            if keep and use_horizzon:
+                documents.append(SelectedDocument('horizzon', snapshot['name'], snapshot['text'].encode('utf-8')))
+                horizzon_metadata.append({k: snapshot[k] for k in ('url', 'tool', 'arguments', 'sha256', 'retrieved_at')})
+        if use_horizzon:
+            st.info('Alleen de resultaten van je leesacties gaan mee. Controleer objectinhoud, relaties en eventuele vervolgpagina’s; de hele repository is niet automatisch onderzocht.')
     missing = missing_sources(selected, documents)
     st.subheader('Jouw bronselectie')
     a, b, c = st.columns(3)
@@ -83,5 +130,5 @@ def render_selection() -> dict:
     if missing:
         st.warning('Nog inhoud nodig voor: ' + '; '.join(missing))
     manifest = {'project': scope, 'goals': goals, 'type': mode, 'sources': rows, 'missing': missing,
-                'enterprise_architecture': enterprise_metadata}
+                'enterprise_architecture': enterprise_metadata, 'horizzon_architecture': horizzon_metadata}
     return {'project_start': project_start, 'scope': scope, 'goals': goals, 'base': base, 'documents': documents, 'missing': missing, 'manifest': manifest}

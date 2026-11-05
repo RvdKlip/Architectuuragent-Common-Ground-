@@ -16,7 +16,9 @@ SOURCE_OPTIONS = (
     SourceOption('enterprise', 'Enterprise architectuur Platform Dienstverlening',
                  'Het overkoepelende architectuurkader voor het platform.',
                  'Kaders, doelarchitectuur en samenhang met het platform.'),
-
+    SourceOption('horizzon', 'Rotterdamse architectuurbron',
+                 'Interne architectuur via de Rotterdamse MCP-server.',
+                 'Bestaande architecturen, componenten, relaties en kaders voor het project.'),
 )
 
 

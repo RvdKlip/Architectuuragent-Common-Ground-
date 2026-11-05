@@ -1,4 +1,4 @@
-"""Lokale brug van het losse index-scherm naar Notion en Confluence.
+"""Lokale brug van het losse index-scherm naar Horizzon, AI, Notion en Confluence.
 
 Platformtokens blijven op de server. Stel PSA_SERVICE_TOKEN (minimaal 24 tekens)
 veilig in en start met python publication_service.py. Geen tokens in index.html.
@@ -16,6 +16,7 @@ from architect_agent.output import house_style
 from architect_agent.notion import publish_plan as notion_publish
 from architect_agent.confluence import publish_plan as confluence_publish
 from architect_agent.ai import generate_plan
+from architect_agent.horizzon_mcp import discover as horizzon_discover, read_source as horizzon_read, HorizzonError
 from architect_agent.epics import list_epics, get_epic, resolve_epic_link
 
 
@@ -108,13 +109,25 @@ def make_handler(environment):
             authorization = self.headers.get('Authorization','')
             if not self.origin_allowed() or not hmac.compare_digest(authorization, 'Bearer '+token):
                 return self.answer(403, {'error':'Geen toegang tot de publicatieservice.'})
-            if self.path not in ('/publish','/generate','/epics/list','/epics/get'):
+            if self.path not in ('/publish','/generate','/epics/list','/epics/get','/horizzon/connect','/horizzon/read'):
                 return self.answer(404, {'error':'Onbekend endpoint.'})
             try:
                 length = int(self.headers.get('Content-Length','0'))
                 if not 0 < length <= 8000000:
                     raise ValueError('Ongeldige of te grote publicatieaanvraag.')
                 payload = json.loads(self.rfile.read(length))
+                if self.path.startswith('/horizzon/'):
+                    try:
+                        if self.path == '/horizzon/connect':
+                            result = horizzon_discover(environment)
+                        else:
+                            result = horizzon_read(payload.get('tool'), payload.get('arguments'),
+                                                   payload.get('confirmed_read_only') is True, environment)
+                        return self.answer(200, result)
+                    except HorizzonError as error:
+                        return self.answer(400, {'error': str(error)})
+                    except Exception:
+                        return self.answer(502, {'error': 'Horizzon ophalen is niet gelukt. Controleer de koppeling en leesrechten.'})
                 if self.path.startswith('/epics/'):
                     try:
                         if self.path == '/epics/list':

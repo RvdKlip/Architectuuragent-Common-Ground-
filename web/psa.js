@@ -26,6 +26,7 @@ const PA = (() => {
       if(entry.error) throw Error('Deze geselecteerde bron is niet leesbaar: '+entry.file.name+'. Kies een leesbare versie of vink de bron uit.');
       sources.push({filename:entry.file.name,pages:entry.pages||1,text:entry.contexts.map(item=>item.text).join('\n'),contexts:entry.contexts});
     }
+    if(isEnabled('horizzon'))for(const item of horizzon.snapshots)if(item.selected)sources.push({filename:item.name,pages:1,text:item.text,contexts:[{source:item.name,text:item.text}]});
     const missing=[...document.querySelectorAll('.source-toggle:checked')].map(input=>input.dataset.category).filter(category=>!selectedDocuments().some(doc=>doc.category===category));
     if(missing.length) throw Error('Voeg eerst inhoud toe voor: '+missing.map(category=>categories[category]).join(', '));
 

@@ -227,3 +227,65 @@ De testset draait lokaal met synthetische documenten en zonder API-verkeer.
 3. Direct gebruik van intern beheerde AI-modellen, zonder externe modelverwerking.
 4. Architectuurregels exporteren als machineleesbare policy-checklist en ADR-registry.
 5. Werken met vaste sjablonen per productteam, versiehistorie en Word-comments.
+
+## Horizzon configureren: tweede fundament
+
+In **2. Bouw je fundament** staan standaard twee geselecteerde architectuurbronnen:
+**Enterprise architectuur Platform Dienstverlening** en **Interne architectuurrepository
+Rotterdam (Horizzon)**. Generatie stopt zolang voor een geselecteerde bron nog geen
+inhoud is geladen. Je kunt een bron bewust uitvinken voor een beperktere uitwerking.
+
+De Rotterdamse MCP-server is ingesteld op **https://rotterdam.mcp.horizzon.cloud/mcp**
+(zonder punt achter `/mcp`). De koppeling gebruikt MCP Streamable HTTP: initialisatie,
+sessie, functiediscovery en leesacties. Er zijn geen fictieve Bizzdesign-functienamen
+of queries ingebouwd: de beschikbare functies en hun parameters komen van de server.
+
+Voor de zelfstandige HTML-app:
+
+1. Installeer met `.venv/bin/python -m pip install -r requirements.txt`.
+2. Stel op de machine waarop de lokale service draait `PSA_SERVICE_TOKEN` veilig in
+   op een eigen ASCII-sleutel van minimaal 24 tekens. Dit beveiligt de lokale service;
+   het is **niet** de Horizzon-authenticatie. Zet geen sleutels in Git of gedeelde HTML.
+3. Zorg dat die machine via HTTPS toegang heeft tot `rotterdam.mcp.horizzon.cloud`.
+   Voor deze cloudomgeving moet het domein in de omgevingsinstellingen toegestaan zijn.
+4. Laat de Horizzon-beheerder vaststellen welke authenticatie voor jullie tenant nodig
+   is. Als een geautoriseerd bearer-access-token wordt verstrekt, bind dat veilig als
+   `HORIZZON_MCP_TOKEN` op de service. De connector stuurt het uitsluitend naar de vaste
+   Rotterdamse MCP-URL. `HORIZZON_MCP_URL` is optioneel en mag alleen deze URL bevatten.
+   Er is geen interactieve OAuth-login ingebouwd. Als jullie tenant OAuth vereist,
+   moet een geautoriseerde tokenvoorziening/verversing nog worden ingericht; een
+   client-secret of gebruikerswachtwoord is geen bearer-access-token.
+5. Start `.venv/bin/python publication_service.py` vanuit de repository.
+6. Open de HTML-app. Open bij Horizzon **Verbinding instellen**, vul de lokale
+   service-URL en de **service-sleutel uit stap 2** in, en klik **Verbind met Horizzon**.
+7. Kies een leesfunctie, vul de door die functie gevraagde parameters in en klik
+   **Voeg resultaat toe als bron**. Herhaal dit voor relevante objecten en relaties.
+   Functies die de server als schrijfactie markeert zijn geblokkeerd. Bij een functie
+   zonder read-only-markering moet je eerst controleren en bevestigen dat deze alleen leest.
+8. Bekijk de opgehaalde inhoud en controleer eventuele vervolgpagina’s. Zoekresultaten
+   bevatten mogelijk alleen verwijzingen: haal zo nodig de objectinhoud apart op.
+   De resultaten krijgen eigen broncodes en gaan samen met de enterprise architectuur
+   mee naar het concept, de optionele AI-synthese en de bestaande exports.
+
+In Streamlit werkt dezelfde bronkaart direct vanuit de Python-server; de aparte lokale
+service en `PSA_SERVICE_TOKEN` zijn daar niet nodig. Horizzon-authenticatie staat wel
+op de Streamlit-server. De parameters zijn daar als JSON-object in te vullen volgens
+het getoonde functieschema. De opgehaalde inhoud blijft in de gebruikerssessie.
+
+Per leesactie worden URL, functienaam, parameters, ophaaldatum en SHA-256 vastgelegd.
+Dit is een selectie uit de repository, geen bewijs dat de hele repository is onderzocht.
+Vernieuw de selectie bij bronwijzigingen. De AI-instructie vraagt beide aangeleverde
+architecturen te gebruiken, broncodes te citeren en conflicten expliciet te maken.
+Zonder AI blijft het resultaat een eerste brongebaseerd concept voor menselijke review.
+Er gaat pas inhoud naar de AI-dienst na de bestaande expliciete generatieactie en
+(in de HTML-app) de toestemming om de geselecteerde bronnen te delen.
+
+Validatie van deze uitbreiding: lokale MCP-mocks, Streamlit-tests en browserproef met
+synthetische bronnen; geen echte AI-aanroep of publicatie. Live Horizzon-toegang is
+nog niet bevestigd: de cloudproxy antwoordde met CONNECT 403 voordat de MCP-server
+werd bereikt. Dat zegt niets over de geldigheid van Horizzon-inloggegevens.
+
+Ontwikkelcontroles: `.venv/bin/python -m pytest -q`; de browserproef draait met
+`node tests/horizzon_browser.cjs` (Playwright en Chromium vereist; standaard
+`/usr/bin/chromium`, te wijzigen met `CHROMIUM_PATH`). Bouw de HTML en ZIP opnieuw met
+`.venv/bin/python scripts/package_app.py` na wijzigingen in de browsercode.

@@ -26,7 +26,10 @@ Projectdocumenten en overige bronnen: voeg één of meerdere PDF-, DOCX-, TXT- o
 Markdown-bestanden toe bij de projectgegevens. Dit werkt lokaal zonder koppeling
 of service-sleutel. Vink per bestand aan of het moet worden meegenomen.
 
-Alleen voor optionele AI en publicatie is een afzonderlijke koppeling nodig.
+Voor de interne Rotterdamse architectuur in stap 2 is de lokale MCP-brug nodig.
+Verbind met Horizzon, haal relevante architectuurinhoud op en voeg deze toe als bron.
+Zie de repository-README voor authenticatie en netwerktoegang.
+Ook voor optionele AI en publicatie is een afzonderlijke koppeling nodig.
 Er zitten geen sleutels of privé-epics in dit bestand. Zie de repository-README:
 https://github.com/RvdKlip/Architectuuragent-Common-Ground-
 

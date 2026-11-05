@@ -124,6 +124,8 @@ def test_pa_screen_generates_from_all_chapters(snapshot, plan, tmp_path):
         assert at.checkbox(key='use_enterprise').value
         assert any('Enterprise architectuur Platform Dienstverlening' in c.label for c in at.checkbox)
         generate.assert_not_called()
+        # This test deliberately exercises the enterprise-only selection.
+        at.checkbox(key='use_horizzon').uncheck().run()
         at.text_input(key='project_name').set_value('Nieuw dienstverleningsproject')
         at.text_area(key='project_goals').set_value('Maak dienstverlening toegankelijker.').run()
         button = next(b for b in at.button if b.label == 'Genereer de architectuur')
